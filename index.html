@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawClinic - 客户与宠物档案管理</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', 'Noto Sans SC', -apple-system, sans-serif; background: #f4f6fa; min-height: 100vh; color: #1e293b; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select, textarea { font-family: inherit; }
+  
+  /* ─── Top Nav ─── */
+  .topnav { background: #fff; border-bottom: 1px solid #e9edf3; padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .topnav-logo { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+  .topnav-logo span { color: #2563eb; }
+  .topnav-menu { display: flex; gap: 4px; margin-left: 40px; }
+  .topnav-menu button { padding: 8px 16px; border-radius: 8px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 500; }
+  .topnav-menu button.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
+  
+  /* ─── Page Container ─── */
+  .page-container { padding: 24px 32px; max-width: 1280px; margin: 0 auto; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; margin-bottom: 18px; }
+  .breadcrumb .active { color: #2563eb; font-weight: 600; }
+  .bc-arrow { width: 14px; height: 14px; }
+  
+  /* ─── Badge ─── */
+  .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; line-height: 20px; white-space: nowrap; }
+  
+  /* ─── Filter Bar ─── */
+  .filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-box { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 240px; padding: 8px 14px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; }
+  .search-box input { border: none; outline: none; flex: 1; font-size: 13px; color: #1e293b; background: transparent; }
+  .filter-select { padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; color: #334155; background: #fff; outline: none; }
+  .btn-primary { display: flex; align-items: center; gap: 6px; padding: 9px 20px; border-radius: 10px; border: none; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 1px 3px rgba(37,99,235,0.3); }
+  .btn-outline { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-size: 13px; font-weight: 500; color: #475569; }
+  
+  /* ─── Table ─── */
+  .data-table-wrap { background: #fff; border-radius: 14px; overflow: hidden; border: 1px solid #e9edf3; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table thead th { padding: 13px 16px; text-align: left; font-weight: 600; color: #64748b; font-size: 12px; border-bottom: 1px solid #e9edf3; letter-spacing: 0.02em; background: #f8fafc; }
+  .data-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .data-table tbody tr:last-child { border-bottom: none; }
+  .data-table tbody tr:hover { background: #f8fafc; }
+  .data-table td { padding: 14px 16px; }
+  .td-name { font-weight: 600; color: #0f172a; }
+  .td-phone { color: #475569; }
+  .td-balance { font-weight: 600; }
+  .td-date { color: #64748b; }
+  .pet-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pet-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 20px; }
+  .pet-tag.dog { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
+  .pet-tag.cat { background: #fdf4ff; color: #86198f; border: 1px solid #f0abfc; }
+  .row-actions { display: flex; gap: 6px; }
+  .btn-table { padding: 5px 12px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; font-size: 12px; font-weight: 500; }
+  .btn-table.blue { color: #2563eb; }
+  .btn-table.gray { color: #475569; }
+  .table-count { margin-top: 14px; font-size: 12px; color: #94a3b8; text-align: right; }
+  .empty-state { padding: 60px; text-align: center; color: #94a3b8; font-size: 14px; }
+  
+  /* ─── Drawer ─── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 998; backdrop-filter: blur(2px); }
+  .drawer { position: fixed; right: 0; top: 0; bottom: 0; background: #fff; z-index: 999; display: flex; flex-direction: column; box-shadow: -8px 0 30px rgba(0,0,0,0.12); animation: slideIn 0.25s ease-out; }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .drawer-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
+  .drawer-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .drawer-header h3 { font-size: 17px; font-weight: 700; color: #0f172a; }
+  .drawer-close { background: #f1f5f9; border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  .drawer-body { flex: 1; overflow: auto; padding: 24px; }
+  .drawer-footer { padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 10px; }
+  .section-label { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 18px; }
+  .section-label.blue { background: #eff6ff; color: #1d4ed8; }
+  .section-label.purple { background: #fdf4ff; color: #86198f; display: flex; justify-content: space-between; align-items: center; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+  .form-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; color: #1e293b; outline: none; }
+  .form-input:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  textarea.form-input { resize: vertical; }
+  .btn-cancel { padding: 9px 20px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-size: 13px; font-weight: 500; color: #475569; }
+  .btn-save { padding: 9px 20px; border-radius: 8px; border: none; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 1px 3px rgba(37,99,235,0.3); }
+  .btn-save-go { padding: 9px 20px; border-radius: 8px; border: none; background: #059669; color: #fff; font-size: 13px; font-weight: 600; }
+  .btn-add-pet-dashed { width: 100%; padding: 10px; border-radius: 8px; border: 1.5px dashed #c4b5fd; background: #faf5ff; color: #7c3aed; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .btn-remove-pet { background: none; border: none; color: #dc2626; font-size: 12px; font-weight: 600; }
+  .temperament-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .temp-tag { display: flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 999px; border: 1px solid #e2e8f0; font-size: 12px; background: #f8fafc; cursor: pointer; }
+  .temp-tag input { accent-color: #2563eb; }
+  
+  /* ─── Add Pet Drawer (enhanced) ─── */
+  .owner-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 5px 12px; border-radius: 6px; background: #eff6ff; font-size: 12px; color: #1d4ed8; font-weight: 500; }
+  .avatar-upload { width: 80px; height: 80px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #c4b5fd; background: #faf5ff; cursor: pointer; }
+  .avatar-upload span.icon { font-size: 28px; }
+  .avatar-upload span.label { font-size: 10px; color: #7c3aed; margin-top: 2px; font-weight: 600; }
+  .breed-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .breed-chip { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; }
+  .breed-chip:hover { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  .weight-wrap { position: relative; }
+  .weight-wrap .unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #94a3b8; font-weight: 600; }
+  .temp-tag-v2 { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; font-size: 12px; cursor: pointer; background: #fff; font-weight: 500; transition: all 0.15s; }
+  .temp-tag-v2:hover { filter: brightness(0.96); }
+  .temp-tag-v2 input { display: none; }
+  .add-pet-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid #f1f5f9; }
+  .add-pet-footer .hint { font-size: 12px; color: #94a3b8; }
+  
+  /* ─── Detail Page ─── */
+  .btn-back { display: flex; align-items: center; gap: 6px; background: none; border: none; color: #64748b; font-size: 13px; margin-bottom: 16px; padding: 0; font-weight: 500; }
+  .detail-layout { display: flex; gap: 24px; align-items: flex-start; }
+  .detail-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+  .detail-right { flex: 1; min-width: 0; }
+  .card { background: #fff; border-radius: 14px; border: 1px solid #e9edf3; }
+  .profile-card { padding: 24px; }
+  .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .profile-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #bfdbfe; }
+  .profile-name { font-size: 17px; font-weight: 700; color: #0f172a; }
+  .profile-phone { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .profile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .profile-meta { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .profile-remark { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: #fffbeb; font-size: 12px; color: #92400e; border: 1px solid #fde68a; line-height: 1.5; }
+  .profile-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .profile-btns button { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-size: 12px; font-weight: 500; }
+  .asset-panel { padding: 20px; }
+  .asset-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+  .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .asset-box { padding: 12px; border-radius: 10px; text-align: center; }
+  .asset-box .val { font-size: 20px; font-weight: 800; }
+  .asset-box .label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .card-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: #f8fafc; margin-bottom: 6px; font-size: 12px; }
+  .card-item .name { color: #334155; font-weight: 500; }
+  .card-item .remain { color: #2563eb; font-weight: 700; }
+  .coupon-row { display: flex; justify-content: space-between; margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: #f8fafc; font-size: 12px; }
+  .btn-recharge { width: 100%; margin-top: 14px; padding: 9px; border-radius: 8px; border: none; background: #2563eb; color: #fff; font-size: 13px; font-weight: 600; }
+  
+  /* Pet Tabs */
+  .pet-tabs { display: flex; margin-bottom: 16px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e9edf3; }
+  .pet-tab { flex: 1; padding: 14px 16px; border: none; font-size: 14px; font-weight: 600; background: #fff; color: #475569; transition: all 0.15s; border-right: 1px solid #e9edf3; }
+  .pet-tab:last-of-type { border-right: none; }
+  .pet-tab.active { background: #2563eb; color: #fff; }
+  .pet-tab-add { padding: 14px 20px; border: none; background: #f8fafc; color: #7c3aed; font-size: 13px; font-weight: 600; border-left: 1px solid #e9edf3; }
+  
+  /* Pet Status */
+  .pet-status { padding: 20px; margin-bottom: 16px; }
+  .pet-info-row { display: flex; gap: 20px; }
+  .pet-avatar-big { width: 64px; height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 34px; flex-shrink: 0; }
+  .pet-avatar-big.dog { background: #eff6ff; border: 2px solid #93c5fd; }
+  .pet-avatar-big.cat { background: #fdf4ff; border: 2px solid #f0abfc; }
+  .pet-detail-name { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .pet-detail-meta { font-size: 12px; font-weight: 400; color: #94a3b8; margin-left: 8px; }
+  .pet-detail-birthday { font-size: 12px; color: #64748b; margin-top: 6px; }
+  .pet-temperaments { display: flex; gap: 6px; margin-top: 6px; }
+  .health-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+  .health-card { padding: 12px 14px; border-radius: 10px; }
+  .health-card .hl { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+  .health-card .hv { font-size: 13px; font-weight: 700; }
+  .health-card .hs { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  
+  /* Biz Tabs */
+  .biz-tabs { display: flex; border-bottom: 1px solid #e9edf3; }
+  .biz-tab { padding: 13px 24px; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #94a3b8; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .biz-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+  .biz-content { padding: 20px; }
+  .record-card { padding: 16px; border-radius: 10px; border: 1px solid #f1f5f9; background: #fafbfc; margin-bottom: 12px; }
+  .record-card:last-child { margin-bottom: 0; }
+  .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .record-date { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .record-attachment { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #2563eb; cursor: pointer; }
+  .record-line { font-size: 13px; color: #334155; margin-bottom: 6px; }
+  .record-line span { font-weight: 600; color: #64748b; }
+  .record-sub { font-size: 12px; color: #64748b; }
+  .record-sub span { font-weight: 600; }
+  .photo-tags { display: flex; gap: 8px; margin-top: 10px; }
+  .photo-tag { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; font-size: 12px; color: #475569; }
+  .billing-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 10px; border: 1px solid #f1f5f9; background: #fafbfc; margin-bottom: 8px; }
+  .billing-item:last-of-type { margin-bottom: 0; }
+  .billing-name { font-size: 13px; font-weight: 600; color: #0f172a; }
+  .billing-date { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .billing-amount { font-size: 16px; font-weight: 800; }
+  .billing-total { margin-top: 14px; padding: 10px 16px; border-radius: 8px; background: #f8fafc; text-align: right; font-size: 13px; }
+  .billing-total span { font-weight: 800; color: #0f172a; font-size: 16px; }
+  .empty-tab { text-align: center; padding: 40px; color: #94a3b8; font-size: 13px; }
+
+  /* SVG icons inline */
+  .icon-sm { width: 16px; height: 16px; vertical-align: middle; }
+  .icon-xs { width: 14px; height: 14px; vertical-align: middle; }
+  .icon-file { width: 13px; height: 13px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ Top Nav ═══════════ -->
+<div class="topnav">
+  <div class="topnav-logo"><span>Paw</span>Clinic</div>
+  <div class="topnav-menu">
+    <button>工作台</button><button>预约排班</button><button class="active">客户宠物</button>
+    <button>医疗管理</button><button>洗护美容</button><button>进销存</button><button>收银</button><button>营销</button>
+  </div>
+</div>
+
+<!-- ═══════════ Page Content ═══════════ -->
+<div class="page-container">
+  <div class="breadcrumb" id="breadcrumb">
+    <span>工作台</span>
+    <svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="active">客户与宠物管理</span>
+  </div>
+  <div id="page-list"></div>
+  <div id="page-detail" style="display:none;"></div>
+</div>
+
+<!-- ═══════════ Create Customer Drawer ═══════════ -->
+<div id="create-drawer-overlay" class="drawer-overlay" style="display:none;" onclick="closeCreateDrawer()"></div>
+<div id="create-drawer" class="drawer" style="display:none; width:520px;" id="createDrawer">
+  <div class="drawer-header">
+    <div class="drawer-header-row">
+      <h3>新建客户及宠物</h3>
+      <button class="drawer-close" onclick="closeCreateDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-body" id="create-drawer-body"></div>
+  <div class="drawer-footer">
+    <button class="btn-cancel" onclick="closeCreateDrawer()">取消</button>
+    <button class="btn-save">保存</button>
+    <button class="btn-save-go">保存并去开单</button>
+  </div>
+</div>
+
+<!-- ═══════════ Add Pet Drawer ═══════════ -->
+<div id="addpet-drawer-overlay" class="drawer-overlay" style="display:none;" onclick="closeAddPetDrawer()"></div>
+<div id="addpet-drawer" class="drawer" style="display:none; width:480px;">
+  <div class="drawer-header">
+    <div class="drawer-header-row">
+      <h3>添加新宠物</h3>
+      <button class="drawer-close" onclick="closeAddPetDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="owner-badge" id="addpet-owner">👤 所属客户：</div>
+  </div>
+  <div class="drawer-body" id="addpet-drawer-body"></div>
+  <div class="add-pet-footer">
+    <div class="hint">带 * 为必填项</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-cancel" onclick="closeAddPetDrawer()">取消</button>
+      <button class="btn-save">保存宠物</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const CUSTOMERS = [
+  {
+    id:1, name:"张晓明", phone:"138****6721", gender:"男", level:"黄金会员", balance:2680, points:1340, source:"美团",
+    registerDate:"2024-03-15", lastVisit:"2025-03-08", remark:"偏好进口粮，价格不敏感", tags:["高价值","老客户"], coupons:3,
+    cards:[{name:"洗澡10次卡",remain:3,total:10},{name:"美容5次卡",remain:5,total:5}],
+    pets:[
+      { id:101, name:"旺财", avatar:"🐕", species:"狗", breed:"金毛寻回犬", birthday:"2022-06-10", age:"2岁9个月", weight:28.5, gender:"公", neutered:true, temperament:["亲人"],
+        lastVaccine:"2024-12-01", nextVaccine:"2025-03-01", vaccineOverdue:true, lastDeworming:"2025-01-15", allergies:["鸡肉蛋白"],
+        medicalRecords:[
+          {date:"2025-03-08",doctor:"李医生",diagnosis:"左前肢皮肤真菌感染",prescription:"外用特比萘芬喷剂 + 口服伊曲康唑",attachment:true},
+          {date:"2025-01-10",doctor:"王医生",diagnosis:"年度体检-各项正常",prescription:"常规驱虫药",attachment:true},
+          {date:"2024-09-22",doctor:"李医生",diagnosis:"急性肠胃炎",prescription:"蒙脱石散+益生菌+处方粮",attachment:false}
+        ],
+        groomRecords:[
+          {date:"2025-02-20",groomer:"小陈",service:"全套洗护+造型",hasBefore:true,hasAfter:true},
+          {date:"2025-01-05",groomer:"小陈",service:"基础洗浴",hasBefore:false,hasAfter:true}
+        ],
+        billingRecords:[
+          {date:"2025-03-08",items:"皮肤科诊疗+药品",amount:380},
+          {date:"2025-02-20",items:"全套洗护+造型(次卡)",amount:0},
+          {date:"2025-01-10",items:"年度体检套餐",amount:520}
+        ]
+      },
+      { id:102, name:"咪咪", avatar:"🐈", species:"猫", breed:"布偶猫", birthday:"2023-09-01", age:"1岁6个月", weight:4.2, gender:"母", neutered:true, temperament:["胆小"],
+        lastVaccine:"2025-01-20", nextVaccine:"2026-01-20", vaccineOverdue:false, lastDeworming:"2025-02-10", allergies:[],
+        medicalRecords:[{date:"2025-01-20",doctor:"王医生",diagnosis:"疫苗接种-猫三联加强",prescription:"妙三多",attachment:true}],
+        groomRecords:[], billingRecords:[{date:"2025-01-20",items:"猫三联疫苗接种",amount:120}]
+      }
+    ]
+  },
+  {
+    id:2, name:"李美琪", phone:"139****8832", gender:"女", level:"普通会员", balance:500, points:260, source:"微信小程序",
+    registerDate:"2024-11-02", lastVisit:"2025-03-05", remark:"", tags:["新客户"], coupons:1, cards:[],
+    pets:[
+      { id:201, name:"豆豆", avatar:"🐩", species:"狗", breed:"泰迪犬", birthday:"2024-01-15", age:"1岁2个月", weight:3.8, gender:"公", neutered:false, temperament:["亲人","咬人预警"],
+        lastVaccine:"2024-12-10", nextVaccine:"2025-03-10", vaccineOverdue:true, lastDeworming:"2025-02-01", allergies:[],
+        medicalRecords:[{date:"2025-03-05",doctor:"李医生",diagnosis:"耳道感染（左耳）",prescription:"耳肤灵+洗耳液",attachment:true}],
+        groomRecords:[{date:"2025-02-28",groomer:"小张",service:"泰迪造型",hasBefore:true,hasAfter:true}],
+        billingRecords:[{date:"2025-03-05",items:"耳科诊疗+药品",amount:210},{date:"2025-02-28",items:"泰迪造型",amount:180}]
+      }
+    ]
+  },
+  {
+    id:3, name:"王建国", phone:"136****4451", gender:"男", level:"钻石会员", balance:8200, points:5680, source:"自然进店",
+    registerDate:"2023-06-20", lastVisit:"2025-03-10", remark:"VIP客户，三只猫定期洗护", tags:["高价值","VIP"], coupons:5,
+    cards:[{name:"洗澡20次卡",remain:12,total:20}],
+    pets:[
+      {id:301,name:"大橘",avatar:"🐈",species:"猫",breed:"橘猫",birthday:"2021-03-10",age:"4岁",weight:6.8,gender:"公",neutered:true,temperament:["亲人"],lastVaccine:"2025-02-01",nextVaccine:"2026-02-01",vaccineOverdue:false,lastDeworming:"2025-02-01",allergies:["磺胺类药物"],medicalRecords:[],groomRecords:[],billingRecords:[]},
+      {id:302,name:"二花",avatar:"🐈",species:"猫",breed:"英短蓝猫",birthday:"2022-07-20",age:"2岁8个月",weight:5.1,gender:"母",neutered:true,temperament:["胆小"],lastVaccine:"2025-02-01",nextVaccine:"2026-02-01",vaccineOverdue:false,lastDeworming:"2025-02-01",allergies:[],medicalRecords:[],groomRecords:[],billingRecords:[]},
+      {id:303,name:"三宝",avatar:"🐈",species:"猫",breed:"美短虎斑",birthday:"2023-12-01",age:"1岁3个月",weight:3.9,gender:"公",neutered:false,temperament:["亲人","抓人预警"],lastVaccine:"2024-11-20",nextVaccine:"2025-02-20",vaccineOverdue:true,lastDeworming:"2025-01-15",allergies:[],medicalRecords:[],groomRecords:[],billingRecords:[]}
+    ]
+  },
+  {
+    id:4, name:"赵薇薇", phone:"158****2209", gender:"女", level:"普通会员", balance:0, points:80, source:"美团",
+    registerDate:"2025-02-10", lastVisit:"2025-02-10", remark:"", tags:["新客户"], coupons:0, cards:[],
+    pets:[
+      {id:401,name:"皮蛋",avatar:"🐕",species:"狗",breed:"柯基犬",birthday:"2024-05-20",age:"10个月",weight:9.2,gender:"公",neutered:false,temperament:["亲人"],lastVaccine:"2025-02-10",nextVaccine:"2025-05-10",vaccineOverdue:false,lastDeworming:"2025-02-10",allergies:[],medicalRecords:[{date:"2025-02-10",doctor:"王医生",diagnosis:"首诊体检+疫苗接种",prescription:"卫佳五",attachment:true}],groomRecords:[],billingRecords:[{date:"2025-02-10",items:"体检+疫苗",amount:260}]}
+    ]
+  }
+];
+
+const LEVEL_COLORS = {
+  "钻石会员":{bg:"#ede9fe",text:"#6d28d9",border:"#c4b5fd"},
+  "黄金会员":{bg:"#fef3c7",text:"#92400e",border:"#fcd34d"},
+  "普通会员":{bg:"#f1f5f9",text:"#475569",border:"#cbd5e1"}
+};
+const TEMP_STYLES = {
+  "亲人":{bg:"#dcfce7",text:"#166534"},
+  "胆小":{bg:"#fef9c3",text:"#854d0e"},
+  "咬人预警":{bg:"#fee2e2",text:"#991b1b"},
+  "抓人预警":{bg:"#fee2e2",text:"#991b1b"}
+};
+const BREEDS = {
+  "狗":["金毛寻回犬","拉布拉多","泰迪犬","柯基犬","萨摩耶","哈士奇","边牧","博美","柴犬","法斗"],
+  "猫":["布偶猫","英短蓝猫","美短虎斑","橘猫","暹罗猫","加菲猫","缅因猫","无毛猫","蓝白英短","金渐层"],
+  "其他":["兔子","仓鼠","龙猫","乌龟","蜥蜴","鹦鹉"]
+};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let state = { view:'list', selectedCustomer:null, activePetIdx:0, activeTab:'medical', createPetCount:1, addPetSpecies:'狗' };
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function badge(text, bg, color, border) {
+  return `<span class="badge" style="background:${bg};color:${color};${border?'border:1px solid '+border:'border:none'}">${text}</span>`;
+}
+function petTag(p) {
+  const cls = p.species==='猫'?'cat':'dog';
+  const icon = p.species==='猫'?'🐱':'🐶';
+  return `<span class="pet-tag ${cls}">${icon} ${p.name}(${p.breed})</span>`;
+}
+function svgSearch(){ return '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'; }
+function svgPlus(){ return '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
+function svgDownload(){ return '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'; }
+function svgBack(){ return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'; }
+function svgFile(){ return '<svg class="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'; }
+function svgArrow(){ return '<svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>'; }
+
+// ═══════════════════════════════════════
+// RENDER LIST PAGE
+// ═══════════════════════════════════════
+function renderList() {
+  const el = document.getElementById('page-list');
+  const search = document.getElementById('search-input')?.value || '';
+  const levelF = document.getElementById('filter-level')?.value || '全部';
+  const speciesF = document.getElementById('filter-species')?.value || '全部';
+
+  const filtered = CUSTOMERS.filter(c => {
+    const ms = !search || c.name.includes(search) || c.phone.includes(search) || c.pets.some(p=>p.name.includes(search));
+    const ml = levelF==='全部' || c.level===levelF;
+    const msp = speciesF==='全部' || c.pets.some(p=> p.species===speciesF);
+    return ms && ml && msp;
+  });
+
+  let rows = filtered.map(c => {
+    const lc = LEVEL_COLORS[c.level];
+    const balColor = c.balance>0?'#059669':'#94a3b8';
+    return `<tr>
+      <td class="td-name">${c.name}</td>
+      <td class="td-phone">${c.phone}</td>
+      <td>${badge(c.level,lc.bg,lc.text,lc.border)}</td>
+      <td class="td-balance" style="color:${balColor}">¥${c.balance.toLocaleString()}</td>
+      <td><div class="pet-tags">${c.pets.map(p=>petTag(p)).join('')}</div></td>
+      <td class="td-date">${c.lastVisit}</td>
+      <td><div class="row-actions">
+        <button class="btn-table blue" onclick="viewDetail(${c.id})">查看详情</button>
+        <button class="btn-table gray">快捷预约</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="filter-bar">
+      <div class="search-box">${svgSearch()}<input id="search-input" placeholder="搜索客户姓名、手机号、宠物昵称..." value="${search}" oninput="renderList()"></div>
+      <select id="filter-level" class="filter-select" onchange="renderList()">
+        <option ${levelF==='全部'?'selected':''}>全部</option><option ${levelF==='钻石会员'?'selected':''}>钻石会员</option><option ${levelF==='黄金会员'?'selected':''}>黄金会员</option><option ${levelF==='普通会员'?'selected':''}>普通会员</option>
+      </select>
+      <select id="filter-species" class="filter-select" onchange="renderList()">
+        <option ${speciesF==='全部'?'selected':''}>全部</option><option ${speciesF==='猫'?'selected':''}>猫</option><option ${speciesF==='狗'?'selected':''}>狗</option>
+      </select>
+      <div style="flex:1"></div>
+      <button class="btn-primary" onclick="openCreateDrawer()">${svgPlus()} 新建客户及宠物</button>
+      <button class="btn-outline">${svgDownload()} 导出</button>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data-table"><thead><tr>
+        <th>客户姓名</th><th>手机号</th><th>会员等级</th><th>账户余额</th><th>旗下宠物</th><th>最近到店</th><th>操作</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+      ${filtered.length===0?'<div class="empty-state">暂无匹配的客户数据</div>':''}
+    </div>
+    <div class="table-count">共 ${filtered.length} 条记录</div>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER DETAIL PAGE
+// ═══════════════════════════════════════
+function renderDetail() {
+  const c = state.selectedCustomer;
+  if(!c) return;
+  const pet = c.pets[state.activePetIdx];
+  const lc = LEVEL_COLORS[c.level];
+  const el = document.getElementById('page-detail');
+
+  // Pet tabs
+  let petTabs = c.pets.map((p,i) => `<button class="pet-tab ${state.activePetIdx===i?'active':''}" onclick="switchPet(${i})">${p.avatar} ${p.name}（${p.breed}）</button>`).join('');
+
+  // Health cards
+  const vBg = pet.vaccineOverdue?'#fef2f2':'#f0fdf4', vBorder = pet.vaccineOverdue?'#fecaca':'#bbf7d0', vColor = pet.vaccineOverdue?'#dc2626':'#059669', vText = pet.vaccineOverdue?'⚠ 已超期':'✓ 正常';
+  const aBg = pet.allergies.length>0?'#fef2f2':'#f8fafc', aBorder = pet.allergies.length>0?'#fecaca':'#e2e8f0', aColor = pet.allergies.length>0?'#dc2626':'#94a3b8', aText = pet.allergies.length>0?'⚠ '+pet.allergies.join('、'):'无记录';
+
+  // Biz records
+  let bizContent = '';
+  if(state.activeTab==='medical'){
+    if(pet.medicalRecords.length===0) bizContent='<div class="empty-tab">暂无病历记录</div>';
+    else bizContent = pet.medicalRecords.map(r => `<div class="record-card">
+      <div class="record-header">
+        <div style="display:flex;align-items:center;gap:10px"><span class="record-date">${r.date}</span>${badge(r.doctor,'#eff6ff','#1d4ed8','#bfdbfe')}</div>
+        ${r.attachment?`<span class="record-attachment">${svgFile()} 查看化验单</span>`:''}
+      </div>
+      <div class="record-line"><span>诊断：</span>${r.diagnosis}</div>
+      <div class="record-sub"><span>处方：</span>${r.prescription}</div>
+    </div>`).join('');
+  } else if(state.activeTab==='groom'){
+    if(pet.groomRecords.length===0) bizContent='<div class="empty-tab">暂无洗护记录</div>';
+    else bizContent = pet.groomRecords.map(r => `<div class="record-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="record-date">${r.date}</span>${badge(r.groomer,'#fdf4ff','#86198f','#f0abfc')}</div>
+      <div class="record-line"><span>项目：</span>${r.service}</div>
+      <div class="photo-tags">${r.hasBefore?'<div class="photo-tag">📷 洗护前照片</div>':''}${r.hasAfter?'<div class="photo-tag">📷 洗护后照片</div>':''}</div>
+    </div>`).join('');
+  } else {
+    if(pet.billingRecords.length===0) bizContent='<div class="empty-tab">暂无消费记录</div>';
+    else {
+      const total = pet.billingRecords.reduce((s,r)=>s+r.amount,0);
+      bizContent = pet.billingRecords.map(r => `<div class="billing-item">
+        <div><div class="billing-name">${r.items}</div><div class="billing-date">${r.date}</div></div>
+        <div class="billing-amount" style="color:${r.amount>0?'#0f172a':'#94a3b8'}">${r.amount>0?'¥'+r.amount:'次卡抵扣'}</div>
+      </div>`).join('') + `<div class="billing-total">累计消费：<span>¥${total.toLocaleString()}</span></div>`;
+    }
+  }
+
+  // Cards
+  let cardsHtml = '';
+  if(c.cards.length>0){
+    cardsHtml = `<div style="margin-top:14px"><div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">卡项</div>
+      ${c.cards.map(card=>`<div class="card-item"><span class="name">${card.name}</span><span class="remain">剩余 ${card.remain}/${card.total}</span></div>`).join('')}
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <button class="btn-back" onclick="backToList()">${svgBack()} 返回列表</button>
+    <div class="detail-layout">
+      <!-- LEFT -->
+      <div class="detail-left">
+        <div class="card profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">${c.gender==='女'?'👩':'👨'}</div>
+            <div><div class="profile-name">${c.name}</div><div class="profile-phone">${c.phone}</div></div>
+          </div>
+          <div class="profile-tags">${badge(c.level,lc.bg,lc.text,lc.border)} ${c.tags.map(t=>badge(t,'#f0fdf4','#166534','#bbf7d0')).join(' ')}</div>
+          <div class="profile-meta">来源：${c.source} | 注册：${c.registerDate}</div>
+          ${c.remark?`<div class="profile-remark">${c.remark}</div>`:''}
+          <div class="profile-btns"><button style="color:#2563eb">编辑资料</button><button style="color:#475569">发送短信</button></div>
+        </div>
+        <div class="card asset-panel">
+          <div class="asset-title">数字资产</div>
+          <div class="asset-grid">
+            <div class="asset-box" style="background:#f0fdf4"><div class="val" style="color:#059669">¥${c.balance.toLocaleString()}</div><div class="label">储值余额</div></div>
+            <div class="asset-box" style="background:#fef3c7"><div class="val" style="color:#d97706">${c.points}</div><div class="label">可用积分</div></div>
+          </div>
+          ${cardsHtml}
+          <div class="coupon-row"><span style="color:#64748b">优惠券</span><span style="color:#6d28d9;font-weight:700">${c.coupons} 张可用</span></div>
+          <button class="btn-recharge">充值</button>
+        </div>
+      </div>
+      <!-- RIGHT -->
+      <div class="detail-right">
+        <div class="pet-tabs">${petTabs}<button class="pet-tab-add" onclick="openAddPetDrawer()">+ 添加</button></div>
+        <div class="card pet-status">
+          <div class="pet-info-row">
+            <div class="pet-avatar-big ${pet.species==='猫'?'cat':'dog'}">${pet.avatar}</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div><span class="pet-detail-name">${pet.name}</span><span class="pet-detail-meta">${pet.breed} · ${pet.gender}${pet.neutered?'-已绝育':'-未绝育'} · ${pet.weight}kg</span></div>
+              <div class="pet-detail-birthday">📅 出生：${pet.birthday}（${pet.age}）</div>
+              <div class="pet-temperaments">${pet.temperament.map(t=>{const s=TEMP_STYLES[t]||TEMP_STYLES['亲人'];return badge((t.includes('预警')?'⚠️ ':'')+t,s.bg,s.text);}).join('')}</div>
+            </div>
+          </div>
+          <div class="health-grid">
+            <div class="health-card" style="background:${vBg};border:1px solid ${vBorder}"><div class="hl">疫苗状态</div><div class="hv" style="color:${vColor}">${vText}</div><div class="hs">下次：${pet.nextVaccine}</div></div>
+            <div class="health-card" style="background:#f0fdf4;border:1px solid #bbf7d0"><div class="hl">驱虫状态</div><div class="hv" style="color:#059669">✓ 正常</div><div class="hs">上次：${pet.lastDeworming}</div></div>
+            <div class="health-card" style="background:${aBg};border:1px solid ${aBorder}"><div class="hl">过敏史</div><div class="hv" style="color:${aColor}">${aText}</div></div>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div class="biz-tabs">
+            <button class="biz-tab ${state.activeTab==='medical'?'active':''}" onclick="switchTab('medical')">医疗病历</button>
+            <button class="biz-tab ${state.activeTab==='groom'?'active':''}" onclick="switchTab('groom')">洗护美容</button>
+            <button class="biz-tab ${state.activeTab==='billing'?'active':''}" onclick="switchTab('billing')">消费账单</button>
+          </div>
+          <div class="biz-content">${bizContent}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// CREATE DRAWER
+// ═══════════════════════════════════════
+function renderCreateDrawerBody() {
+  const body = document.getElementById('create-drawer-body');
+  let petSections = '';
+  for(let i=0; i<state.createPetCount; i++){
+    petSections += `
+      <div style="margin-bottom:20px">
+        <div class="section-label purple"><span>宠物信息 #${i+1}</span>${i>0?`<button class="btn-remove-pet" onclick="removeCreatePet()">移除</button>`:''}</div>
+        <div class="form-grid">
+          <div><label class="form-label">宠物昵称 *</label><input class="form-input" placeholder="请输入昵称"></div>
+          <div><label class="form-label">宠物种类 *</label><select class="form-input"><option>狗</option><option>猫</option><option>其他</option></select></div>
+          <div><label class="form-label">宠物品种</label><input class="form-input" placeholder="支持拼音检索 如 JM=金毛"></div>
+          <div><label class="form-label">生日</label><input type="date" class="form-input"></div>
+          <div><label class="form-label">性别及绝育</label><select class="form-input"><option>公-未绝育</option><option>公-已绝育</option><option>母-未绝育</option><option>母-已绝育</option></select></div>
+          <div><label class="form-label">体重(kg)</label><input type="number" class="form-input" placeholder="0.0" step="0.1"></div>
+          <div class="full"><label class="form-label">性格预警</label>
+            <div class="temperament-tags">
+              <label class="temp-tag"><input type="checkbox"> 亲人</label>
+              <label class="temp-tag"><input type="checkbox"> 胆小</label>
+              <label class="temp-tag"><input type="checkbox"> ⚠️咬人预警</label>
+              <label class="temp-tag"><input type="checkbox"> ⚠️抓人预警</label>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  body.innerHTML = `
+    <div class="section-label blue">客户基础信息</div>
+    <div class="form-grid" style="margin-bottom:24px">
+      <div><label class="form-label">手机号码 *</label><input class="form-input" placeholder="输入后自动校验是否已存在"></div>
+      <div><label class="form-label">客户姓名 *</label><input class="form-input" placeholder="请输入姓名"></div>
+      <div><label class="form-label">客户性别</label><select class="form-input"><option>男</option><option>女</option><option>未知</option></select></div>
+      <div><label class="form-label">客户来源</label><select class="form-input"><option>美团</option><option>自然进店</option><option>微信小程序</option><option>朋友推荐</option></select></div>
+      <div class="full"><label class="form-label">客户备注</label><textarea class="form-input" rows="2" placeholder="记录客户特殊偏好或注意事项..."></textarea></div>
+    </div>
+    ${petSections}
+    <button class="btn-add-pet-dashed" onclick="addCreatePet()">+ 添加另一只宠物</button>`;
+}
+
+function openCreateDrawer(){ state.createPetCount=1; document.getElementById('create-drawer-overlay').style.display='block'; document.getElementById('create-drawer').style.display='flex'; renderCreateDrawerBody(); }
+function closeCreateDrawer(){ document.getElementById('create-drawer-overlay').style.display='none'; document.getElementById('create-drawer').style.display='none'; }
+function addCreatePet(){ state.createPetCount++; renderCreateDrawerBody(); }
+function removeCreatePet(){ if(state.createPetCount>1){state.createPetCount--; renderCreateDrawerBody();} }
+
+// ═══════════════════════════════════════
+// ADD PET DRAWER (from detail page)
+// ═══════════════════════════════════════
+function renderAddPetDrawerBody() {
+  const sp = state.addPetSpecies;
+  const breeds = BREEDS[sp] || [];
+  const icon = sp==='猫'?'🐱':sp==='狗'?'🐶':'🐾';
+  const chips = breeds.slice(0,6).map(b=>`<span class="breed-chip" onclick="this.closest('.full').querySelector('input').value='${b}'">${b}</span>`).join('');
+  const more = breeds.length>6?`<span style="padding:3px 10px;font-size:11px;color:#94a3b8">+${breeds.length-6} 更多...</span>`:'';
+  const datalist = breeds.map(b=>`<option value="${b}">`).join('');
+  const tempTags = [
+    {label:'亲人',icon:'💚',color:'#166534',border:'#bbf7d0'},
+    {label:'胆小',icon:'💛',color:'#854d0e',border:'#fde68a'},
+    {label:'咬人预警',icon:'🔴',color:'#991b1b',border:'#fecaca'},
+    {label:'抓人预警',icon:'🔴',color:'#991b1b',border:'#fecaca'}
+  ].map(t=>`<label class="temp-tag-v2" style="color:${t.color};border:1.5px solid ${t.border}"><input type="checkbox">${t.icon} ${t.label}</label>`).join('');
+
+  document.getElementById('addpet-drawer-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+      <div class="avatar-upload"><span class="icon">${icon}</span><span class="label">上传头像</span></div>
+      <div style="flex:1;font-size:12px;color:#94a3b8;line-height:1.6">支持 JPG、PNG 格式<br>建议正面清晰照片，方便医生辨认</div>
+    </div>
+    <div class="form-grid">
+      <div><label class="form-label">宠物昵称 *</label><input class="form-input" placeholder="请输入昵称"></div>
+      <div><label class="form-label">宠物种类 *</label>
+        <select class="form-input" id="addpet-species" onchange="state.addPetSpecies=this.value;renderAddPetDrawerBody()">
+          <option ${sp==='狗'?'selected':''}>狗</option><option ${sp==='猫'?'selected':''}>猫</option><option ${sp==='其他'?'selected':''}>其他</option>
+        </select>
+      </div>
+      <div class="full"><label class="form-label">宠物品种 *</label>
+        <input class="form-input" placeholder="支持下拉选择或拼音首字母检索，如 JM = 金毛" list="breed-list-add">
+        <datalist id="breed-list-add">${datalist}</datalist>
+        <div class="breed-chips">${chips}${more}</div>
+      </div>
+      <div><label class="form-label">生日</label><input type="date" class="form-input"><div style="font-size:11px;color:#94a3b8;margin-top:4px">系统将自动计算年龄</div></div>
+      <div><label class="form-label">性别及绝育状态 *</label><select class="form-input"><option>公 - 未绝育</option><option>公 - 已绝育</option><option>母 - 未绝育</option><option>母 - 已绝育</option></select></div>
+      <div><label class="form-label">当前体重</label><div class="weight-wrap"><input type="number" class="form-input" placeholder="0.0" step="0.1" style="padding-right:36px"><span class="unit">kg</span></div></div>
+      <div><label class="form-label">毛色</label><input class="form-input" placeholder="如：金色、黑白、蓝灰"></div>
+    </div>
+    <div style="margin-top:20px"><label class="form-label">性格预警</label><div class="temperament-tags">${tempTags}</div></div>
+    <div style="margin-top:20px"><label class="form-label">特殊备注</label><textarea class="form-input" rows="3" placeholder="记录宠物特殊情况，如已知过敏源、慢性疾病、行为习惯等..."></textarea></div>`;
+}
+
+function openAddPetDrawer(){
+  state.addPetSpecies='狗';
+  document.getElementById('addpet-owner').innerHTML = '👤 所属客户：'+state.selectedCustomer.name;
+  document.getElementById('addpet-drawer-overlay').style.display='block';
+  document.getElementById('addpet-drawer').style.display='flex';
+  renderAddPetDrawerBody();
+}
+function closeAddPetDrawer(){ document.getElementById('addpet-drawer-overlay').style.display='none'; document.getElementById('addpet-drawer').style.display='none'; }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function viewDetail(id) {
+  state.selectedCustomer = CUSTOMERS.find(c=>c.id===id);
+  state.activePetIdx = 0;
+  state.activeTab = 'medical';
+  state.view = 'detail';
+  document.getElementById('page-list').style.display='none';
+  document.getElementById('page-detail').style.display='block';
+  document.getElementById('breadcrumb').innerHTML = `<span>工作台</span>${svgArrow()}<span style="cursor:pointer" onclick="backToList()">客户与宠物管理</span>${svgArrow()}<span class="active">${state.selectedCustomer.name}</span>`;
+  renderDetail();
+}
+function backToList() {
+  state.view = 'list';
+  document.getElementById('page-detail').style.display='none';
+  document.getElementById('page-list').style.display='block';
+  document.getElementById('breadcrumb').innerHTML = `<span>工作台</span>${svgArrow()}<span class="active">客户与宠物管理</span>`;
+  renderList();
+}
+function switchPet(idx){ state.activePetIdx=idx; state.activeTab='medical'; renderDetail(); }
+function switchTab(tab){ state.activeTab=tab; renderDetail(); }
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderList();
+</script>
+</body>
+</html>
