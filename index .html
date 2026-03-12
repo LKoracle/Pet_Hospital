@@ -280,6 +280,55 @@
 .cfg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .cfg-sub{font-size:11px;color:#94a3b8;margin-bottom:4px;}
 
+
+  /* ═══════ Grooming Module CSS ═══════ */
+  .kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;min-height:500px;}
+  .kanban-col{min-width:210px;width:210px;flex-shrink:0;background:#f8fafc;border-radius:12px;border:1px solid #e9edf3;display:flex;flex-direction:column;max-height:calc(100vh - 280px);}
+  .kanban-header{padding:12px 14px;border-bottom:1px solid #e9edf3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .kanban-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .kanban-count{background:#e2e8f0;color:#64748b;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;}
+  .kanban-body{flex:1;overflow-y:auto;padding:8px;}
+  .groom-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #e9edf3;cursor:grab;transition:box-shadow .15s,transform .15s;}
+  .groom-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px);}
+  .groom-card:active{cursor:grabbing;}
+  .groom-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .groom-card-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .groom-card-avatar.dog{background:#eff6ff;border:1px solid #93c5fd;}
+  .groom-card-avatar.cat{background:#fdf4ff;border:1px solid #f0abfc;}
+  .groom-card-name{font-size:13px;font-weight:700;color:#0f172a;}
+  .groom-card-breed{font-size:11px;color:#94a3b8;}
+  .groom-card-svc{font-size:11px;color:#334155;padding:4px 8px;background:#f1f5f9;border-radius:6px;margin-bottom:6px;}
+  .groom-card-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;}
+  .groom-card-staff{display:flex;align-items:center;gap:4px;}
+  .groom-card-warn{font-size:10px;padding:2px 8px;border-radius:99px;background:#fee2e2;color:#991b1b;font-weight:600;}
+  .groom-card-time{font-size:10px;color:#2563eb;font-weight:600;}
+  .groom-card-actions{display:flex;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;}
+  .groom-card-btn{flex:1;padding:5px;border-radius:6px;border:none;font-size:10px;font-weight:600;text-align:center;cursor:pointer;}
+  .groom-card-btn.next{background:#dbeafe;color:#1d4ed8;}
+  .groom-card-btn.done{background:#d1fae5;color:#065f46;}
+  .groom-card-btn.detail{background:#f1f5f9;color:#64748b;}
+  /* Pricing table */
+  .price-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .price-table th{padding:10px 14px;text-align:left;font-weight:600;color:#64748b;font-size:12px;border-bottom:1px solid #e9edf3;background:#f8fafc;}
+  .price-table td{padding:10px 14px;border-bottom:1px solid #f1f5f9;}
+  .price-table tbody tr:hover{background:#f8fafc;}
+  .price-val{font-weight:700;color:#059669;}
+  .addon-tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500;margin:2px;background:#f5f3ff;color:#7c3aed;border:1px solid #e9d5ff;}
+  /* Work log */
+  .log-card{background:#fff;border-radius:12px;border:1px solid #e9edf3;padding:16px;margin-bottom:12px;}
+  .log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .log-pet{display:flex;align-items:center;gap:10px;}
+  .log-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .log-name{font-size:14px;font-weight:700;color:#0f172a;}
+  .log-sub{font-size:12px;color:#94a3b8;}
+  .log-photos{display:flex;gap:8px;margin-top:10px;}
+  .log-photo{width:64px;height:64px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8;border:1px dashed #cbd5e1;flex-shrink:0;}
+  .log-note{margin-top:10px;padding:8px 12px;border-radius:8px;background:#fffbeb;font-size:12px;color:#92400e;border:1px solid #fde68a;line-height:1.5;}
+  .log-split{display:flex;gap:8px;margin-top:8px;font-size:12px;}
+  .log-split-item{flex:1;padding:6px 10px;border-radius:8px;background:#f8fafc;text-align:center;}
+  .log-split-role{font-size:10px;color:#94a3b8;}
+  .log-split-name{font-weight:600;color:#0f172a;}
+
 </style>
 </head>
 <body>
@@ -287,7 +336,7 @@
   <div class="topnav-logo"><span>Paw</span>Clinic</div>
   <div class="topnav-menu">
     <button>工作台</button><button id="nav-bk" onclick="goModule('booking')">预约排班</button><button class="active" id="nav-crm" onclick="goModule('crm')">客户宠物</button>
-    <button>医疗管理</button><button>洗护美容</button><button>进销存</button><button>收银</button><button>营销</button>
+    <button>医疗管理</button><button id="nav-groom" onclick="goModule('groom')">洗护美容</button><button>进销存</button><button>收银</button><button>营销</button>
   </div>
 </div>
 <div class="page-container">
@@ -297,6 +346,7 @@
   <div id="page-detail" style="display:none;"></div>
   </div>
   <div id="module-booking" style="display:none"></div>
+  <div id="module-groom" style="display:none"></div>
 </div>
 
 
@@ -949,9 +999,11 @@ function goModule(mod){
   state.currentModule = mod;
   document.getElementById('module-crm').style.display = mod==='crm' ? 'block' : 'none';
   document.getElementById('module-booking').style.display = mod==='booking' ? 'block' : 'none';
+  document.getElementById('module-groom').style.display = mod==='groom' ? 'block' : 'none';
   document.querySelectorAll('.topnav-menu button').forEach(function(b){ b.classList.remove('active'); });
   if(mod==='crm') document.getElementById('nav-crm').classList.add('active');
   else if(mod==='booking'){ document.getElementById('nav-bk').classList.add('active'); initBookingPage(); }
+  else if(mod==='groom'){ document.getElementById('nav-groom').classList.add('active'); initGroomPage(); }
 }
 function initBookingPage(){
   var el = document.getElementById('module-booking');
@@ -960,6 +1012,188 @@ function initBookingPage(){
     + '<div class="mod-tabs"><button class="mod-tab '+(d?'active':'')+'" onclick="switchMod(\'dash\')">预约看板</button><button class="mod-tab '+(!d?'active':'')+'" onclick="switchMod(\'sched\')">员工排班</button></div>'
     + '<div id="pg-dash"'+(!d?' style="display:none"':'')+'></div><div id="pg-sched"'+(d?' style="display:none"':'')+'></div>';
   if(d) renderDash(); else renderSched();
+}
+
+// ═══════════════════════════════════════════
+// GROOMING MODULE
+// ═══════════════════════════════════════════
+var GS = { tab:'kanban' };
+
+var GROOM_SERVICES = [
+  {name:'基础洗浴',weights:[{range:'≤5kg',price:68},{range:'5-10kg',price:88},{range:'10-20kg',price:128},{range:'20kg+',price:168}]},
+  {name:'精洗SPA',weights:[{range:'≤5kg',price:128},{range:'5-10kg',price:168},{range:'10-20kg',price:228},{range:'20kg+',price:298}]},
+  {name:'造型修剪',weights:[{range:'≤5kg',price:98},{range:'5-10kg',price:138},{range:'10-20kg',price:188},{range:'20kg+',price:258}]},
+  {name:'全套洗护+造型',weights:[{range:'≤5kg',price:168},{range:'5-10kg',price:228},{range:'10-20kg',price:318},{range:'20kg+',price:428}]},
+];
+var GROOM_ADDONS = [{name:'开结(轻度)',price:30},{name:'开结(重度)',price:80},{name:'拔耳毛',price:20},{name:'刷牙',price:25},{name:'药浴升级',price:50},{name:'SPA精油护理',price:60}];
+var GROOM_SPECIAL = [{breed:'巨型贵宾',addon:'+80'},{breed:'缅因猫',addon:'+60'},{breed:'阿拉斯加',addon:'+100'},{breed:'萨摩耶',addon:'+80'}];
+
+var GROOM_TASKS = [
+  {id:1,pet:'🐶',name:'旺财',breed:'金毛寻回犬',species:'dog',svc:'全套洗护+造型',staff:'小陈',warn:'',status:'grooming',owner:'张晓明',phone:'138****6721',checkinTime:'09:00',beforePhoto:true,notes:'毛发略打结，需先开结'},
+  {id:2,pet:'🐶',name:'豆豆',breed:'泰迪犬',species:'dog',svc:'泰迪造型',staff:'小张',warn:'⚠️咬人预警',status:'drying',owner:'李美琪',phone:'139****8832',checkinTime:'10:00',beforePhoto:true,notes:''},
+  {id:3,pet:'🐱',name:'大橘',breed:'橘猫',species:'cat',svc:'基础洗浴',staff:'小陈',warn:'',status:'washing',owner:'王建国',phone:'136****4451',checkinTime:'10:30',beforePhoto:true,notes:''},
+  {id:4,pet:'🐶',name:'糯米',breed:'萨摩耶',species:'dog',svc:'全套洗护+造型',staff:'小张',warn:'',status:'todo',owner:'周美美',phone:'133****5567',checkinTime:'11:00',beforePhoto:false,notes:'大型犬，预留额外时间'},
+  {id:5,pet:'🐱',name:'布丁',breed:'布偶猫',species:'cat',svc:'猫咪洗护',staff:'小陈',warn:'',status:'todo',owner:'何小花',phone:'136****2288',checkinTime:'11:30',beforePhoto:false,notes:'猫比较胆小'},
+  {id:6,pet:'🐶',name:'皮蛋',breed:'柯基犬',species:'dog',svc:'基础洗浴',staff:'小张',warn:'',status:'ready',owner:'赵薇薇',phone:'158****2209',checkinTime:'09:30',beforePhoto:true,notes:''},
+  {id:7,pet:'🐱',name:'二花',breed:'英短蓝猫',species:'cat',svc:'基础洗浴',staff:'小陈',warn:'',status:'done',owner:'王建国',phone:'136****4451',checkinTime:'08:30',beforePhoto:true,notes:'洗护顺利，发现左耳有轻微发红，建议就医检查',afterPhoto:true,staffWash:'小李(助理)',staffGroom:'小陈'},
+  {id:8,pet:'🐶',name:'黑豆',breed:'拉布拉多',species:'dog',svc:'精洗SPA',staff:'小张',warn:'',status:'done',owner:'陈大方',phone:'135****7720',checkinTime:'08:00',beforePhoto:true,notes:'毛发顺滑，状态很好',afterPhoto:true,staffWash:'小李(助理)',staffGroom:'小张'},
+];
+
+var GROOM_COLS = [
+  {key:'todo',label:'待洗护',icon:'📋',color:'#64748b',bg:'#f8fafc'},
+  {key:'washing',label:'洗浴中',icon:'🚿',color:'#0284c7',bg:'#f0f9ff'},
+  {key:'drying',label:'烘干中',icon:'💨',color:'#d97706',bg:'#fffbeb'},
+  {key:'grooming',label:'修剪/美容中',icon:'✂️',color:'#7c3aed',bg:'#faf5ff'},
+  {key:'ready',label:'待接回',icon:'🏠',color:'#059669',bg:'#f0fdf4'},
+  {key:'done',label:'已完成',icon:'✅',color:'#475569',bg:'#f8fafc'},
+];
+
+function initGroomPage(){
+  var el=document.getElementById('module-groom');
+  el.innerHTML='<div class="breadcrumb"><span>工作台</span><svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="active">洗护美容管理</span></div>'
+    +'<div class="mod-tabs"><button class="mod-tab '+(GS.tab==='kanban'?'active':'')+'" onclick="GS.tab=\'kanban\';initGroomPage()">流程看板</button><button class="mod-tab '+(GS.tab==='pricing'?'active':'')+'" onclick="GS.tab=\'pricing\';initGroomPage()">服务项目与定价</button><button class="mod-tab '+(GS.tab==='log'?'active':'')+'" onclick="GS.tab=\'log\';initGroomPage()">工作记录</button></div>'
+    +'<div id="groom-content"></div>';
+  if(GS.tab==='kanban') renderKanban();
+  else if(GS.tab==='pricing') renderPricing();
+  else renderGroomLog();
+}
+
+// ─── KANBAN ───
+function renderKanban(){
+  var el=document.getElementById('groom-content');
+  var active=GROOM_TASKS.filter(function(t){return t.status!=='done';}).length;
+  var done=GROOM_TASKS.filter(function(t){return t.status==='done';}).length;
+  var statsHtml='<div style="display:flex;gap:16px;margin-bottom:16px">'
+    +'<div style="flex:1;background:#fff;border-radius:10px;padding:14px 18px;border:1px solid #e9edf3;display:flex;align-items:center;gap:12px"><div style="width:38px;height:38px;border-radius:10px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:16px">🐾</div><div><div style="font-size:22px;font-weight:800;color:#0f172a">'+active+'</div><div style="font-size:12px;color:#94a3b8">进行中</div></div></div>'
+    +'<div style="flex:1;background:#fff;border-radius:10px;padding:14px 18px;border:1px solid #e9edf3;display:flex;align-items:center;gap:12px"><div style="width:38px;height:38px;border-radius:10px;background:#d1fae5;display:flex;align-items:center;justify-content:center;font-size:16px">✅</div><div><div style="font-size:22px;font-weight:800;color:#0f172a">'+done+'</div><div style="font-size:12px;color:#94a3b8">今日已完成</div></div></div>'
+    +'<div style="flex:1"></div>'
+    +'<div style="display:flex;align-items:center;font-size:11px;color:#94a3b8;gap:14px"><span>🔵 蓝=医疗 🟢 绿=洗护 🟡 黄=疫苗</span></div>'
+    +'</div>';
+
+  var colsHtml='<div class="kanban">';
+  GROOM_COLS.forEach(function(col){
+    var tasks=GROOM_TASKS.filter(function(t){return t.status===col.key;});
+    var cardsHtml=tasks.map(function(t){
+      var avCls=t.species==='cat'?'cat':'dog';
+      var nextStatus=getNextStatus(t.status);
+      var nextLabel=getNextLabel(t.status);
+      var actionBtns='';
+      if(t.status!=='done'){
+        actionBtns='<div class="groom-card-actions">'
+          +(nextStatus?'<button class="groom-card-btn next" onclick="moveTask('+t.id+',\''+nextStatus+'\')">→ '+nextLabel+'</button>':'')
+          +'<button class="groom-card-btn detail" onclick="openGroomDetail('+t.id+')">详情</button>'
+          +'</div>';
+      }
+      return '<div class="groom-card" draggable="true" ondragstart="dragStart(event,'+t.id+')">'
+        +'<div class="groom-card-head"><div class="groom-card-avatar '+avCls+'">'+t.pet+'</div><div><div class="groom-card-name">'+t.name+(t.warn?' <span class="groom-card-warn">'+t.warn+'</span>':'')+'</div><div class="groom-card-breed">'+t.breed+' · '+t.owner+'</div></div></div>'
+        +'<div class="groom-card-svc">'+t.svc+'</div>'
+        +'<div class="groom-card-meta"><div class="groom-card-staff">✂️ '+t.staff+'</div><div class="groom-card-time">'+t.checkinTime+'</div></div>'
+        +actionBtns
+        +'</div>';
+    }).join('');
+
+    colsHtml+='<div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropTask(event,\''+col.key+'\')" style="border-top:3px solid '+col.color+'">'
+      +'<div class="kanban-header"><div class="kanban-title" style="color:'+col.color+'">'+col.icon+' '+col.label+'</div><span class="kanban-count">'+tasks.length+'</span></div>'
+      +'<div class="kanban-body">'+cardsHtml+'</div></div>';
+  });
+  colsHtml+='</div>';
+  el.innerHTML=statsHtml+colsHtml;
+}
+
+function getNextStatus(s){return {todo:'washing',washing:'drying',drying:'grooming',grooming:'ready',ready:'done'}[s]||null;}
+function getNextLabel(s){return {todo:'开始洗浴',washing:'开始烘干',drying:'开始美容',grooming:'洗护完成',ready:'客户已接走'}[s]||'';}
+
+function moveTask(id,newStatus){
+  var t=GROOM_TASKS.find(function(x){return x.id===id;});
+  if(t){
+    t.status=newStatus;
+    if(newStatus==='ready'){alert('📱 已向 '+t.owner+' 推送通知："您的宝贝 '+t.pet+t.name+' 已洗香香，可以来接啦~"');}
+  }
+  renderKanban();
+}
+function dragStart(e,id){e.dataTransfer.setData('text/plain',id);}
+function dropTask(e,status){e.preventDefault();var id=parseInt(e.dataTransfer.getData('text/plain'));moveTask(id,status);}
+
+// ─── GROOMING DETAIL (via status drawer) ───
+function openGroomDetail(id){
+  var t=GROOM_TASKS.find(function(x){return x.id===id;});if(!t)return;
+  var statusLabel={'todo':'待洗护','washing':'洗浴中','drying':'烘干中','grooming':'修剪中','ready':'待接回','done':'已完成'};
+  var statusBg={'todo':'#f1f5f9','washing':'#e0f2fe','drying':'#fef3c7','grooming':'#f5f3ff','ready':'#d1fae5','done':'#f1f5f9'};
+  var statusColor={'todo':'#475569','washing':'#0284c7','drying':'#d97706','grooming':'#7c3aed','ready':'#059669','done':'#475569'};
+  document.getElementById('st-title').textContent='洗护详情 - '+t.name;
+  var nextS=getNextStatus(t.status);var nextL=getNextLabel(t.status);
+  var actHtml='';
+  if(t.status!=='done'&&nextS){actHtml='<button class="btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick="moveTask('+t.id+',\''+nextS+'\');closeSt()">→ '+nextL+'</button>';}
+  document.getElementById('st-body').innerHTML=''
+    +'<div style="text-align:center;margin-bottom:16px"><span class="badge" style="background:'+statusBg[t.status]+';color:'+statusColor[t.status]+';padding:6px 16px;font-size:13px">'+statusLabel[t.status]+'</span></div>'
+    +'<div style="background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">宠物</div><div style="font-weight:600">'+t.pet+' '+t.name+'</div></div>'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">品种</div><div style="font-weight:600">'+t.breed+'</div></div>'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">主人</div><div style="font-weight:600">'+t.owner+'</div></div>'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">电话</div><div style="font-weight:600">'+t.phone+'</div></div>'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">服务</div><div style="font-weight:600">'+t.svc+'</div></div>'
+    +'<div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">美容师</div><div style="font-weight:600">'+t.staff+'</div></div>'
+    +'</div></div>'
+    +(t.warn?'<div style="padding:8px 12px;border-radius:8px;background:#fee2e2;font-size:12px;color:#991b1b;margin-bottom:12px;font-weight:600">'+t.warn+'</div>':'')
+    +(t.notes?'<div style="padding:8px 12px;border-radius:8px;background:#fffbeb;font-size:12px;color:#92400e;margin-bottom:12px;border:1px solid #fde68a">📝 '+t.notes+'</div>':'')
+    +'<div style="margin-top:12px"><div class="form-label">照片留档</div><div style="display:flex;gap:8px">'
+    +(t.beforePhoto?'<div style="width:64px;height:64px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:10px;color:#1d4ed8;font-weight:600">洗前照</div>':'')
+    +'<div style="width:64px;height:64px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:20px;color:#94a3b8;border:1px dashed #cbd5e1;cursor:pointer" title="上传照片">+</div>'
+    +'</div></div>'
+    +actHtml;
+  document.getElementById('st-ov').style.display='block';
+  document.getElementById('st-dw').style.display='flex';
+}
+
+// ─── PRICING ───
+function renderPricing(){
+  var el=document.getElementById('groom-content');
+  var rows=GROOM_SERVICES.map(function(s){
+    return '<tr><td style="font-weight:600">'+s.name+'</td>'+s.weights.map(function(w){return '<td class="price-val">¥'+w.price+'</td>';}).join('')+'</tr>';
+  }).join('');
+  var addonHtml=GROOM_ADDONS.map(function(a){return '<span class="addon-tag">'+a.name+' ¥'+a.price+'</span>';}).join('');
+  var specialRows=GROOM_SPECIAL.map(function(s){return '<tr><td style="font-weight:600">'+s.breed+'</td><td class="price-val" style="color:#d97706">基础价 '+s.addon+'</td></tr>';}).join('');
+  el.innerHTML=''
+    +'<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:hidden;margin-bottom:20px">'
+    +'<div style="padding:16px 20px;border-bottom:1px solid #e9edf3;display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px;font-weight:700;color:#0f172a">按体重阶梯定价</div><button class="btn-primary" style="font-size:12px;padding:6px 14px">+ 新增服务项目</button></div>'
+    +'<table class="price-table"><thead><tr><th>服务项目</th><th>≤5kg</th><th>5-10kg</th><th>10-20kg</th><th>20kg+</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="display:flex;gap:16px">'
+    +'<div style="flex:1;background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:16px 20px">'
+    +'<div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px">附加服务项</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+addonHtml+'</div>'
+    +'<button class="btn-primary" style="font-size:12px;padding:6px 14px;margin-top:12px">+ 添加附加项</button></div>'
+    +'<div style="flex:1;background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:16px 20px">'
+    +'<div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px">品种特殊定价</div>'
+    +'<table class="price-table"><thead><tr><th>品种</th><th>附加费</th></tr></thead><tbody>'+specialRows+'</tbody></table></div>'
+    +'</div>'
+    +'<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:16px 20px;margin-top:16px">'
+    +'<div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px">服务卡项打包</div>'
+    +'<div style="display:flex;gap:12px">'
+    +'<div style="flex:1;padding:14px;border-radius:10px;border:1px solid #e9edf3;background:#f8fafc"><div style="font-size:13px;font-weight:600;color:#0f172a">基础洗浴10次卡</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">买10送1 · 适用≤10kg</div><div style="font-size:16px;font-weight:800;color:#059669;margin-top:6px">¥680</div></div>'
+    +'<div style="flex:1;padding:14px;border-radius:10px;border:1px solid #e9edf3;background:#f8fafc"><div style="font-size:13px;font-weight:600;color:#0f172a">精洗SPA月卡</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">每月4次 · 不限体重</div><div style="font-size:16px;font-weight:800;color:#059669;margin-top:6px">¥599/月</div></div>'
+    +'<div style="flex:1;padding:14px;border-radius:10px;border:1px solid #e9edf3;background:#f8fafc"><div style="font-size:13px;font-weight:600;color:#0f172a">全套年卡</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">洗护+造型 每月2次</div><div style="font-size:16px;font-weight:800;color:#059669;margin-top:6px">¥3,680/年</div></div>'
+    +'</div></div>';
+}
+
+// ─── WORK LOG ───
+function renderGroomLog(){
+  var el=document.getElementById('groom-content');
+  var doneTasks=GROOM_TASKS.filter(function(t){return t.status==='done';});
+  var logHtml=doneTasks.map(function(t){
+    var avBg=t.species==='cat'?'background:#fdf4ff;border:1px solid #f0abfc':'background:#eff6ff;border:1px solid #93c5fd';
+    return '<div class="log-card">'
+      +'<div class="log-header"><div class="log-pet"><div class="log-avatar" style="'+avBg+'">'+t.pet+'</div><div><div class="log-name">'+t.name+' <span style="font-size:12px;font-weight:400;color:#94a3b8">'+t.breed+' · '+t.owner+'</span></div><div class="log-sub">'+t.svc+' · 签到 '+t.checkinTime+'</div></div></div><span class="badge" style="background:#d1fae5;color:#065f46">已完成</span></div>'
+      +'<div class="log-photos">'
+      +(t.beforePhoto?'<div class="log-photo" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;font-weight:600">📷 洗前</div>':'')
+      +(t.afterPhoto?'<div class="log-photo" style="background:#d1fae5;color:#065f46;border:1px solid #86efac;font-weight:600">📷 洗后</div>':'')
+      +'<div class="log-photo">+ 上传</div>'
+      +'</div>'
+      +(t.notes?'<div class="log-note">📝 美容师备注：'+t.notes+'</div>':'')
+      +(t.staffWash?'<div class="log-split"><div class="log-split-item"><div class="log-split-role">洗浴</div><div class="log-split-name">'+t.staffWash+'</div></div><div class="log-split-item"><div class="log-split-role">美容/修剪</div><div class="log-split-name">'+t.staffGroom+'</div></div></div>':'')
+      +'</div>';
+  }).join('');
+  if(!doneTasks.length) logHtml='<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">今日暂无已完成的洗护记录</div>';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-size:14px;font-weight:700;color:#0f172a">今日工作记录 ('+doneTasks.length+')</div><div style="display:flex;gap:8px"><select class="filter-select"><option>全部美容师</option><option>小陈</option><option>小张</option></select><button class="btn-outline" style="font-size:12px;padding:6px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出</button></div></div>'+logHtml;
 }
 
 state.currentModule="crm";
