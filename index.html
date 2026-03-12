@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PawClinic - 客户与宠物档案管理</title>
+<title>PawClinic - 宠物医院管理系统</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -159,20 +159,165 @@
   .btn-edit-sm:hover { background: #eff6ff; }
   .icon-sm { width: 16px; height: 16px; vertical-align: middle; }
   .icon-file { width: 13px; height: 13px; vertical-align: middle; }
+
+  /* ═══════ Booking Module CSS ═══════ */
+  .fl{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;}
+  .fi{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #e2e8f0;font-size:13px;color:#1e293b;outline:none;}
+  .fi:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+  textarea.fi{resize:vertical;}
+  .bc{padding:9px 20px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:500;color:#475569;}
+/* Module tabs */
+.mod-tabs{display:flex;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e9edf3;margin-bottom:24px;}
+.mod-tab{flex:1;padding:14px 20px;border:none;font-size:14px;font-weight:600;background:#fff;color:#64748b;transition:all .15s;border-right:1px solid #e9edf3;}
+.mod-tab:last-child{border-right:none;} .mod-tab.active{background:#2563eb;color:#fff;}
+
+/* Stats */
+.stats-bar{display:flex;gap:16px;margin-bottom:20px;}
+.stat-card{flex:1;background:#fff;border-radius:10px;padding:16px 20px;border:1px solid #e9edf3;display:flex;align-items:center;gap:14px;}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.stat-val{font-size:24px;font-weight:800;color:#0f172a;} .stat-lbl{font-size:12px;color:#94a3b8;margin-top:1px;}
+
+/* Controls */
+.dash-ctrl{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.vw-switch{display:flex;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e9edf3;}
+.vw-btn{padding:7px 16px;border:none;background:#fff;font-size:12px;font-weight:600;color:#64748b;border-right:1px solid #e9edf3;}
+.vw-btn:last-child{border-right:none;} .vw-btn.active{background:#2563eb;color:#fff;}
+.date-nav{display:flex;align-items:center;gap:8px;}
+.date-nav button{width:32px;height:32px;border-radius:8px;border:1px solid #e9edf3;background:#fff;display:flex;align-items:center;justify-content:center;}
+.date-nav .dl{font-size:14px;font-weight:700;color:#0f172a;min-width:160px;text-align:center;}
+.flt-sel{padding:7px 12px;border-radius:8px;border:1px solid #e9edf3;font-size:12px;color:#334155;background:#fff;outline:none;}
+
+/* Day/Resource View */
+.rv-wrap{overflow-x:auto;}
+.rv-scroll{max-height:calc(100vh - 310px);overflow-y:auto;}
+.rv{display:flex;background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:hidden;min-width:800px;}
+.tc{width:64px;flex-shrink:0;border-right:1px solid #e9edf3;background:#f8fafc;}
+.ts{height:60px;padding:4px 6px;font-size:10px;font-weight:600;color:#94a3b8;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:flex-end;}
+.rc{flex:1;min-width:200px;border-right:1px solid #f1f5f9;} .rc:last-child{border-right:none;}
+.rh{padding:10px 14px;border-bottom:1px solid #e9edf3;background:#f8fafc;display:flex;align-items:center;gap:8px;height:44px;}
+.rn{font-size:13px;font-weight:700;color:#0f172a;} .rr{font-size:10px;color:#94a3b8;font-weight:500;}
+.rb{position:relative;} .sr{height:60px;border-bottom:1px solid #f8fafc;}
+
+/* Appointment blocks */
+.ab{position:absolute;left:5px;right:5px;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;overflow:hidden;transition:box-shadow .15s,transform .15s;z-index:5;}
+.ab:hover{box-shadow:0 4px 14px rgba(0,0,0,0.13);transform:translateY(-1px);z-index:10;}
+.ab.med{background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-left:3px solid #2563eb;color:#1e40af;}
+.ab.grm{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-left:3px solid #059669;color:#065f46;}
+.ab.vac{background:linear-gradient(135deg,#fef3c7,#fde68a);border-left:3px solid #d97706;color:#92400e;}
+.ab-n{font-weight:700;font-size:12px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ab-p{font-size:10px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ab-s{position:absolute;top:5px;right:7px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;line-height:1;}
+.sp{border:2px solid #cbd5e1;background:#fff;} .sc{background:#059669;color:#fff;} .ss{background:#2563eb;color:#fff;animation:pls 1.5s infinite;} .sx{background:#cbd5e1;color:#fff;}
+@keyframes pls{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Tooltip */
+.tt{display:none;position:absolute;top:100%;left:0;width:250px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);padding:14px;z-index:100;font-size:12px;border:1px solid #e9edf3;}
+.ab:hover .tt{display:block;}
+.ttr{display:flex;justify-content:space-between;margin-bottom:5px;} .ttl{color:#94a3b8;font-weight:500;} .ttv{color:#0f172a;font-weight:600;text-align:right;max-width:140px;}
+.tta{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;}
+.ttb{flex:1;padding:6px;border-radius:6px;border:none;font-size:11px;font-weight:600;text-align:center;}
+.ttb-g{background:#d1fae5;color:#059669;} .ttb-r{background:#fee2e2;color:#dc2626;} .ttb-b{background:#dbeafe;color:#2563eb;}
+
+/* Week View */
+.wv{background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:auto;}
+.wv table{width:100%;border-collapse:collapse;font-size:12px;min-width:900px;}
+.wv th{padding:10px 8px;font-weight:600;color:#64748b;font-size:11px;border-bottom:1px solid #e9edf3;background:#f8fafc;text-align:center;}
+.wv th:first-child{text-align:left;padding-left:14px;width:80px;}
+.wv td{padding:4px;border-bottom:1px solid #f8fafc;vertical-align:top;height:60px;}
+.wv td:first-child{padding-left:14px;font-weight:600;color:#64748b;font-size:11px;vertical-align:middle;width:80px;background:#fafbfc;border-right:1px solid #f1f5f9;}
+.wv-appt{padding:4px 8px;border-radius:6px;font-size:10px;margin-bottom:3px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.wv-appt.med{background:#dbeafe;color:#1e40af;} .wv-appt.grm{background:#d1fae5;color:#065f46;} .wv-appt.vac{background:#fef3c7;color:#92400e;}
+.wv-count{font-size:10px;color:#94a3b8;padding:2px 0;}
+
+/* Schedule */
+.sch-grid{background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:auto;}
+.sch table{width:100%;border-collapse:collapse;font-size:13px;min-width:850px;}
+.sch th{padding:12px 10px;text-align:center;font-weight:600;color:#64748b;font-size:12px;border-bottom:1px solid #e9edf3;background:#f8fafc;}
+.sch th:first-child{text-align:left;padding-left:16px;width:170px;}
+.sch td{padding:6px;text-align:center;border-bottom:1px solid #f1f5f9;height:52px;vertical-align:middle;}
+.sch td:first-child{text-align:left;padding-left:16px;font-weight:600;color:#0f172a;background:#fff;border-right:1px solid #f1f5f9;}
+.sch tbody tr:hover td{background:#f8fafc;}
+.sb{display:inline-flex;padding:4px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;min-width:72px;justify-content:center;}
+.sb:hover{filter:brightness(.92);}
+.sb-f{background:#d1fae5;color:#065f46;} .sb-m{background:#dbeafe;color:#1d4ed8;} .sb-a{background:#fef3c7;color:#92400e;} .sb-o{background:#f1f5f9;color:#94a3b8;} .sb-l{background:#fee2e2;color:#dc2626;}
+.grp-row td{background:#f8fafc !important;font-weight:700;color:#64748b;font-size:11px;letter-spacing:.04em;text-align:center !important;padding:8px !important;}
+.legend{display:flex;gap:14px;font-size:11px;color:#64748b;align-items:center;}
+.lg-d{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
+
+/* Drawer */
+
+/* Steps */
+.steps{display:flex;align-items:center;margin-bottom:24px;}
+.sd{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.sd.act{background:#2563eb;color:#fff;} .sd.dn{background:#059669;color:#fff;} .sd.td{background:#f1f5f9;color:#94a3b8;}
+.sl{flex:1;height:2px;margin:0 8px;} .sl.dn{background:#059669;} .sl.act{background:#2563eb;} .sl.td{background:#e2e8f0;}
+.stt{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:16px;}
+
+/* Selectable cards */
+.sc2{padding:12px 16px;border-radius:10px;border:2px solid #e9edf3;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.sc2:hover{border-color:#93c5fd;background:#eff6ff;} .sc2.sel{border-color:#2563eb;background:#eff6ff;}
+.sc2 .mn{font-size:13px;font-weight:600;color:#0f172a;} .sc2 .sb2{font-size:11px;color:#94a3b8;margin-top:2px;}
+
+/* Time grid */
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.tc2{padding:10px;border-radius:8px;border:1px solid #e9edf3;text-align:center;font-size:12px;font-weight:600;color:#334155;cursor:pointer;transition:all .15s;}
+.tc2:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff;}
+.tc2.sel{background:#2563eb;color:#fff;border-color:#2563eb;}
+.tc2.dis{background:#f1f5f9;color:#cbd5e1;cursor:not-allowed;border-color:#f1f5f9;}
+
+.sr2{padding:10px 14px;border-radius:8px;cursor:pointer;transition:background .1s;}
+.sr2:hover{background:#f8fafc;} .sr2 .nm{font-size:13px;font-weight:600;color:#0f172a;} .sr2 .ph{font-size:12px;color:#94a3b8;}
+
+/* Cancelled list */
+.cx-list{margin-top:16px;padding:14px 16px;border-radius:10px;background:#f8fafc;border:1px solid #e9edf3;}
+.cx-title{font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:8px;}
+.cx-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12px;}
+.cx-row:last-child{border-bottom:none;}
+
+/* Config panel */
+.cfg{background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:18px 22px;margin-bottom:20px;}
+.cfg-title{font-size:13px;font-weight:700;color:#0f172a;margin-bottom:14px;}
+.cfg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.cfg-sub{font-size:11px;color:#94a3b8;margin-bottom:4px;}
+
 </style>
 </head>
 <body>
 <div class="topnav">
   <div class="topnav-logo"><span>Paw</span>Clinic</div>
   <div class="topnav-menu">
-    <button>工作台</button><button>预约排班</button><button class="active">客户宠物</button>
+    <button>工作台</button><button id="nav-bk" onclick="goModule('booking')">预约排班</button><button class="active" id="nav-crm" onclick="goModule('crm')">客户宠物</button>
     <button>医疗管理</button><button>洗护美容</button><button>进销存</button><button>收银</button><button>营销</button>
   </div>
 </div>
 <div class="page-container">
+  <div id="module-crm">
   <div class="breadcrumb" id="breadcrumb"><span>工作台</span><svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="active">客户与宠物管理</span></div>
   <div id="page-list"></div>
   <div id="page-detail" style="display:none;"></div>
+  </div>
+  <div id="module-booking" style="display:none"></div>
+</div>
+
+
+<!-- ═══ Booking Module Drawers ═══ -->
+<div id="bk-ov" class="drawer-overlay" style="display:none" onclick="closeBk()"></div>
+<div id="bk-dw" class="drawer" style="display:none;width:520px">
+  <div class="drawer-header"><div class="drawer-header-row"><h3>新建预约</h3><button class="drawer-close" onclick="closeBk()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="drawer-body" id="bk-body"></div>
+  <div class="drawer-footer" id="bk-foot"></div>
+</div>
+<div id="st-ov" class="drawer-overlay" style="display:none" onclick="closeSt()"></div>
+<div id="st-dw" class="drawer" style="display:none;width:440px">
+  <div class="drawer-header"><div class="drawer-header-row"><h3 id="st-title">预约操作</h3><button class="drawer-close" onclick="closeSt()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="drawer-body" id="st-body"></div>
+  <div class="drawer-footer"><button class="btn-cancel" onclick="closeSt()">关闭</button></div>
+</div>
+<div id="sh-ov" class="drawer-overlay" style="display:none" onclick="closeShift()"></div>
+<div id="sh-dw" class="drawer" style="display:none;width:380px">
+  <div class="drawer-header"><div class="drawer-header-row"><h3 id="sh-title">修改班次</h3><button class="drawer-close" onclick="closeShift()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="drawer-body" id="sh-body"></div>
+  <div class="drawer-footer"><button class="btn-cancel" onclick="closeShift()">取消</button><button class="btn-save" onclick="saveShift()">保存</button></div>
 </div>
 
 <!-- Create Customer Drawer -->
@@ -477,6 +622,347 @@ function viewDetail(id){state.selectedCustomer=CUSTOMERS.find(c=>c.id===id);stat
 function backToList(){state.view='list';document.getElementById('page-detail').style.display='none';document.getElementById('page-list').style.display='block';document.getElementById('breadcrumb').innerHTML=`<span>工作台</span>${svgArrow()}<span class="active">客户与宠物管理</span>`;renderList();}
 function switchPet(i){state.activePetIdx=i;state.activeTab='medical';renderDetail();}
 function switchTab(t){state.activeTab=t;renderDetail();}
+
+// ═══════ DATA ═══════
+const STAFF=[
+  {id:1,name:"李医生",role:"主治医师",group:"medical",emoji:"👨‍⚕️"},
+  {id:2,name:"王医生",role:"全科医师",group:"medical",emoji:"👩‍⚕️"},
+  {id:3,name:"小陈",role:"资深美容师",group:"groom",emoji:"✂️"},
+  {id:4,name:"小张",role:"美容师",group:"groom",emoji:"✂️"},
+];
+const WK=['03/10 周一','03/11 周二','03/12 周三','03/13 周四','03/14 周五','03/15 周六','03/16 周日'];
+const WK_SHORT=['周一','周二','周三','周四','周五','周六','周日'];
+const SCHED={1:['full','full','morning','full','full','morning','off'],2:['morning','full','full','morning','full','off','morning'],3:['full','full','full','afternoon','full','full','off'],4:['off','full','full','full','morning','full','full']};
+const HRS=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+
+const APPTS=[
+  {id:1,sid:1,time:'09:00',dur:2,cust:'张晓明',pet:'🐶旺财(金毛)',svc:'皮肤复诊',type:'med',status:'checked',phone:'138****6721',note:'',day:1},
+  {id:2,sid:1,time:'10:30',dur:3,cust:'李美琪',pet:'🐶豆豆(泰迪)',svc:'耳道复查',type:'med',status:'pending',phone:'139****8832',note:'客户说可能迟到10分钟',day:1},
+  {id:3,sid:1,time:'14:00',dur:2,cust:'赵薇薇',pet:'🐶皮蛋(柯基)',svc:'疫苗接种',type:'vac',status:'pending',phone:'158****2209',note:'',day:1},
+  {id:4,sid:2,time:'09:30',dur:2,cust:'王建国',pet:'🐱三宝(美短)',svc:'疫苗补种',type:'vac',status:'serving',phone:'136****4451',note:'对磺胺类过敏，注意！',day:1},
+  {id:5,sid:2,time:'11:00',dur:3,cust:'陈大方',pet:'🐶黑豆(拉布拉多)',svc:'腹泻就诊',type:'med',status:'pending',phone:'135****7720',note:'',day:1},
+  {id:6,sid:2,time:'14:30',dur:2,cust:'林小雨',pet:'🐱团团(橘猫)',svc:'年度体检',type:'med',status:'cancelled',phone:'137****9981',note:'客户临时有事取消',day:1},
+  {id:7,sid:3,time:'09:00',dur:4,cust:'张晓明',pet:'🐶旺财(金毛)',svc:'全套洗护+造型',type:'grm',status:'serving',phone:'138****6721',note:'',day:1},
+  {id:8,sid:3,time:'13:00',dur:3,cust:'王建国',pet:'🐱大橘(橘猫)',svc:'基础洗浴',type:'grm',status:'pending',phone:'136****4451',note:'',day:1},
+  {id:9,sid:3,time:'15:30',dur:4,cust:'周美美',pet:'🐶糯米(萨摩耶)',svc:'全套洗护+造型',type:'grm',status:'pending',phone:'133****5567',note:'大型犬，需预留额外时间',day:1},
+  {id:10,sid:4,time:'10:00',dur:3,cust:'李美琪',pet:'🐶豆豆(泰迪)',svc:'泰迪造型',type:'grm',status:'checked',phone:'139****8832',note:'',day:1},
+  {id:11,sid:4,time:'14:00',dur:3,cust:'何小花',pet:'🐱布丁(布偶猫)',svc:'猫咪洗护',type:'grm',status:'pending',phone:'136****2288',note:'猫比较胆小，动作轻一点',day:1},
+  // Other days for week view
+  {id:12,sid:1,time:'10:00',dur:2,cust:'赵薇薇',pet:'🐶皮蛋(柯基)',svc:'皮肤复诊',type:'med',status:'pending',phone:'158****2209',note:'',day:2},
+  {id:13,sid:2,time:'09:00',dur:2,cust:'张晓明',pet:'🐱咪咪(布偶)',svc:'猫三联疫苗',type:'vac',status:'pending',phone:'138****6721',note:'',day:2},
+  {id:14,sid:3,time:'10:00',dur:4,cust:'何小花',pet:'🐱布丁(布偶猫)',svc:'猫咪全套',type:'grm',status:'pending',phone:'136****2288',note:'',day:2},
+  {id:15,sid:1,time:'09:00',dur:3,cust:'陈大方',pet:'🐶黑豆(拉布拉多)',svc:'术后复查',type:'med',status:'pending',phone:'135****7720',note:'',day:3},
+  {id:16,sid:3,time:'14:00',dur:4,cust:'周美美',pet:'🐶糯米(萨摩耶)',svc:'洗护造型',type:'grm',status:'pending',phone:'133****5567',note:'',day:3},
+  {id:17,sid:4,time:'09:00',dur:3,cust:'王建国',pet:'🐱二花(英短)',svc:'基础洗浴',type:'grm',status:'pending',phone:'136****4451',note:'',day:4},
+  {id:18,sid:2,time:'14:00',dur:2,cust:'李美琪',pet:'🐶豆豆(泰迪)',svc:'驱虫',type:'vac',status:'pending',phone:'139****8832',note:'',day:5},
+];
+
+const CUSTS=[
+  {name:'张晓明',phone:'138****6721',pets:['🐶 旺财(金毛)','🐱 咪咪(布偶)']},
+  {name:'李美琪',phone:'139****8832',pets:['🐶 豆豆(泰迪)']},
+  {name:'王建国',phone:'136****4451',pets:['🐱 大橘(橘猫)','🐱 二花(英短)','🐱 三宝(美短)']},
+  {name:'赵薇薇',phone:'158****2209',pets:['🐶 皮蛋(柯基)']},
+];
+
+let S={mod:'dash',view:'resource',bkStep:1,bkCust:null,bkPet:null,bkSvc:null,bkStaff:null,bkTime:null,shStaff:null,shDay:null};
+
+// ═══════ HELPERS ═══════
+function idx(t){return HRS.indexOf(t);}
+function svgPlus(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';}
+function svgL(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>';}
+function svgR(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';}
+function svgX(){return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';}
+
+// ═══════ DASHBOARD ═══════
+function renderDash(){
+  const el=document.getElementById('pg-dash');
+  const today=APPTS.filter(a=>a.day===1);
+  const tot=today.length,chk=today.filter(a=>a.status==='checked'||a.status==='serving').length,cx=today.filter(a=>a.status==='cancelled').length,wait=today.filter(a=>a.status==='pending').length;
+
+  let content='';
+  if(S.view==='resource') content=buildResourceView(today);
+  else content=buildWeekView();
+
+  const cxAppts=today.filter(a=>a.status==='cancelled');
+  let cxHtml='';
+  if(cxAppts.length){
+    cxHtml=`<div class="cx-list"><div class="cx-title">已取消预约 (${cxAppts.length})</div>${cxAppts.map(a=>`<div class="cx-row"><div><span style="font-weight:600;color:#334155">${a.cust}</span><span style="color:#94a3b8;margin-left:8px">${a.pet} · ${a.svc} · ${a.time}</span></div><span style="color:#94a3b8;font-size:11px">${a.note||'无备注'}</span></div>`).join('')}</div>`;
+  }
+
+  el.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-icon" style="background:#dbeafe">📅</div><div><div class="stat-val">${tot}</div><div class="stat-lbl">今日总预约</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#d1fae5">✅</div><div><div class="stat-val">${chk}</div><div class="stat-lbl">已签到/服务中</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fee2e2">❌</div><div><div class="stat-val">${cx}</div><div class="stat-lbl">已取消</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fef3c7">⏳</div><div><div class="stat-val">${wait}</div><div class="stat-lbl">待到店</div></div></div>
+    </div>
+    <div class="dash-ctrl">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="vw-switch">
+          <button class="vw-btn ${S.view==='resource'?'active':''}" onclick="S.view='resource';renderDash()">资源视图</button>
+          <button class="vw-btn ${S.view==='week'?'active':''}" onclick="S.view='week';renderDash()">周视图</button>
+        </div>
+        <div class="date-nav"><button>${svgL()}</button><div class="dl">${S.view==='week'?'2025年 第11周 (3/10-3/16)':'2025-03-11 周二'}</div><button>${svgR()}</button></div>
+        <select class="flt-sel"><option>全部员工</option><option>医疗组</option><option>洗护组</option></select>
+      </div>
+      <button class="btn-primary" onclick="openBk()">${svgPlus()} 代客预约</button>
+    </div>
+    ${content}
+    ${S.view==='resource'?cxHtml:''}
+  `;
+}
+
+function buildResourceView(today){
+  let cols='';
+  STAFF.forEach(s=>{
+    const appts=today.filter(a=>a.sid===s.id&&a.status!=='cancelled');
+    let slots=HRS.map(()=>'<div class="sr"></div>').join('');
+    let blocks=appts.map(a=>{
+      const i=idx(a.time);if(i<0)return '';
+      const top=i*60,h=a.dur*30-3;
+      const cls=a.type==='med'?'med':a.type==='vac'?'vac':'grm';
+      const scls=a.status==='pending'?'sp':a.status==='checked'?'sc':'ss';
+      const shtml=a.status==='pending'?'':a.status==='checked'?'✓':'⚡';
+      return `<div class="ab ${cls}" style="top:${top}px;height:${h}px" onclick="openSt(${a.id})">
+        <div class="ab-s ${scls}">${shtml}</div>
+        <div class="ab-n">${a.cust}</div>
+        <div class="ab-p">${a.pet} · ${a.svc}</div>
+        <div class="tt">
+          <div class="ttr"><span class="ttl">客户</span><span class="ttv">${a.cust}</span></div>
+          <div class="ttr"><span class="ttl">宠物</span><span class="ttv">${a.pet}</span></div>
+          <div class="ttr"><span class="ttl">服务</span><span class="ttv">${a.svc}</span></div>
+          <div class="ttr"><span class="ttl">时间</span><span class="ttv">${a.time} (${a.dur*30}min)</span></div>
+          <div class="ttr"><span class="ttl">电话</span><span class="ttv">${a.phone}</span></div>
+          ${a.note?`<div class="ttr"><span class="ttl">备注</span><span class="ttv" style="color:#dc2626">${a.note}</span></div>`:''}
+          <div class="tta">
+            <button class="ttb ttb-g" onclick="event.stopPropagation();doCheckin(${a.id})">签到</button>
+            <button class="ttb ttb-b" onclick="event.stopPropagation()">改签</button>
+            <button class="ttb ttb-r" onclick="event.stopPropagation();doCancel(${a.id})">取消</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    cols+=`<div class="rc"><div class="rh"><span style="font-size:15px">${s.emoji}</span><div><div class="rn">${s.name}</div><div class="rr">${s.role}</div></div></div><div class="rb">${slots}${blocks}</div></div>`;
+  });
+  return `<div class="rv-wrap"><div class="rv-scroll"><div class="rv"><div class="tc"><div style="height:44px;border-bottom:1px solid #e9edf3"></div>${HRS.map(h=>`<div class="ts">${h}</div>`).join('')}</div>${cols}</div></div></div>`;
+}
+
+function buildWeekView(){
+  // Group appointments by day
+  let headerCells=WK.map((d,i)=>{
+    const isToday=i===1;
+    return `<th style="${isToday?'background:#eff6ff;color:#2563eb':''}">${d}${isToday?' <span style="font-size:9px;background:#2563eb;color:#fff;padding:1px 6px;border-radius:99px;margin-left:4px">今天</span>':''}</th>`;
+  }).join('');
+
+  // Build rows per time block (morning/afternoon)
+  const periods=[{label:'上午',hours:['09:00','09:30','10:00','10:30','11:00','11:30']},{label:'下午',hours:['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30']}];
+
+  let rows='';
+  periods.forEach(p=>{
+    let cells=WK.map((_,dayIdx)=>{
+      const dayNum=dayIdx;
+      const dayAppts=APPTS.filter(a=>a.day===dayNum&&p.hours.includes(a.time));
+      if(!dayAppts.length) return `<td><div class="wv-count">无预约</div></td>`;
+      return `<td>${dayAppts.map(a=>{
+        const cls=a.type==='med'?'med':a.type==='vac'?'vac':'grm';
+        const staff=STAFF.find(st=>st.id===a.sid);
+        return `<div class="wv-appt ${cls}" onclick="openSt(${a.id})" title="${a.cust} ${a.pet} ${a.svc}">${a.time} ${a.cust} · ${staff?staff.name:''}</div>`;
+      }).join('')}</td>`;
+    }).join('');
+    rows+=`<tr><td>${p.label}</td>${cells}</tr>`;
+  });
+
+  // Summary row
+  let sumCells=WK.map((_,dayIdx)=>{
+    const cnt=APPTS.filter(a=>a.day===dayIdx).length;
+    const pct=Math.min(cnt/5*100,100);
+    const color=pct>80?'#dc2626':pct>50?'#d97706':'#059669';
+    return `<td style="vertical-align:middle"><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:4px">${cnt} 预约</div><div style="height:4px;border-radius:2px;background:#f1f5f9"><div style="height:100%;border-radius:2px;background:${color};width:${pct}%"></div></div><div style="font-size:10px;color:#94a3b8;margin-top:2px">饱和度 ${Math.round(pct)}%</div></td>`;
+  }).join('');
+
+  return `<div class="wv"><table><thead><tr><th>时段</th>${headerCells}</tr></thead><tbody>${rows}<tr style="background:#f8fafc"><td style="font-weight:700;color:#64748b">汇总</td>${sumCells}</tr></tbody></table></div>`;
+}
+
+// ═══════ SCHEDULE ═══════
+function renderSched(){
+  const el=document.getElementById('pg-sched');
+  const SL={full:'全天班',morning:'早班',afternoon:'晚班',off:'休息',leave:'请假'};
+  const SC2={full:'sb-f',morning:'sb-m',afternoon:'sb-a',off:'sb-o',leave:'sb-l'};
+
+  function staffRows(group){
+    return STAFF.filter(s=>s.group===group).map(s=>{
+      let cells=WK.map((_,i)=>{const sh=SCHED[s.id][i];return `<td><span class="sb ${SC2[sh]}" onclick="openShift(${s.id},${i})">${SL[sh]}</span></td>`;}).join('');
+      return `<tr><td>${s.emoji} ${s.name}<div style="font-size:11px;color:#94a3b8;font-weight:400">${s.role}</div></td>${cells}</tr>`;
+    }).join('');
+  }
+
+  el.innerHTML=`
+    <div class="dash-ctrl">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="date-nav"><button>${svgL()}</button><div class="dl">2025年 第11周</div><button>${svgR()}</button></div>
+        <div class="legend">
+          <div class="legend" style="display:flex;gap:12px">
+            <div style="display:flex;align-items:center;gap:4px"><div class="lg-d" style="background:#d1fae5"></div>全天</div>
+            <div style="display:flex;align-items:center;gap:4px"><div class="lg-d" style="background:#dbeafe"></div>早班</div>
+            <div style="display:flex;align-items:center;gap:4px"><div class="lg-d" style="background:#fef3c7"></div>晚班</div>
+            <div style="display:flex;align-items:center;gap:4px"><div class="lg-d" style="background:#f1f5f9"></div>休息</div>
+            <div style="display:flex;align-items:center;gap:4px"><div class="lg-d" style="background:#fee2e2"></div>请假</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" style="background:#334155"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 复制上周</button>
+        <button class="btn-primary">保存排班</button>
+      </div>
+    </div>
+    <div class="cfg">
+      <div class="cfg-title">排班规则配置</div>
+      <div class="cfg-grid">
+        <div><div class="fl">早班时段</div><div style="display:flex;gap:8px;align-items:center"><input class="fi" value="09:00" style="width:80px"><span style="color:#94a3b8">-</span><input class="fi" value="18:00" style="width:80px"></div></div>
+        <div><div class="fl">晚班时段</div><div style="display:flex;gap:8px;align-items:center"><input class="fi" value="12:00" style="width:80px"><span style="color:#94a3b8">-</span><input class="fi" value="21:00" style="width:80px"></div></div>
+        <div><div class="fl">预约颗粒度</div><div style="display:flex;gap:12px"><div><div class="cfg-sub">医疗号源</div><select class="fi" style="width:90px"><option>15分钟</option><option selected>30分钟</option></select></div><div><div class="cfg-sub">洗护预约</div><select class="fi" style="width:90px"><option selected>1小时</option><option>2小时</option></select></div></div></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:16px">
+        <div><div class="fl">服务并发量限制</div><div style="display:flex;gap:12px"><div><div class="cfg-sub">美容师·大型犬</div><select class="fi" style="width:80px"><option selected>1只/时段</option><option>2只/时段</option></select></div><div><div class="cfg-sub">美容师·小型犬</div><select class="fi" style="width:80px"><option>1只/时段</option><option selected>2只/时段</option></select></div></div></div>
+      </div>
+    </div>
+    <div class="sch-grid sch"><table><thead><tr><th>员工</th>${WK.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>
+      <tr class="grp-row"><td colspan="8">🏥 医疗组</td></tr>${staffRows('medical')}
+      <tr class="grp-row"><td colspan="8">✂️ 洗护组</td></tr>${staffRows('groom')}
+    </tbody></table></div>
+    <div style="margin-top:12px;font-size:11px;color:#94a3b8;text-align:center">💡 点击班次标签可快速修改 · 修改后记得点击「保存排班」</div>
+  `;
+}
+
+// ═══════ SHIFT EDIT ═══════
+function openShift(sid,day){
+  S.shStaff=sid;S.shDay=day;
+  const staff=STAFF.find(s=>s.id===sid);
+  const cur=SCHED[sid][day];
+  document.getElementById('sh-title').textContent=`修改班次 - ${staff.name} ${WK[day]}`;
+  const opts=[{k:'full',l:'全天班 (09:00-21:00)',c:'sb-f'},{k:'morning',l:'早班 (09:00-18:00)',c:'sb-m'},{k:'afternoon',l:'晚班 (12:00-21:00)',c:'sb-a'},{k:'off',l:'休息',c:'sb-o'},{k:'leave',l:'请假',c:'sb-l'}];
+  document.getElementById('sh-body').innerHTML=`
+    <div style="margin-bottom:20px;padding:12px 16px;border-radius:10px;background:#f8fafc;font-size:13px">
+      <span style="color:#94a3b8">当前：</span><span style="font-weight:700">${opts.find(o=>o.k===cur)?.l||cur}</span>
+    </div>
+    <div class="fl">选择新班次</div>
+    ${opts.map(o=>`<div class="sc2 ${cur===o.k?'sel':''}" onclick="selectShift('${o.k}',this)"><div class="mn"><span class="sb ${o.c}" style="margin-right:8px">${o.l.split(' ')[0]}</span>${o.l}</div></div>`).join('')}
+  `;
+  document.getElementById('sh-ov').style.display='block';
+  document.getElementById('sh-dw').style.display='flex';
+}
+function selectShift(k,el){document.querySelectorAll('#sh-body .sc2').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');S.shNewVal=k;}
+function closeShift(){document.getElementById('sh-ov').style.display='none';document.getElementById('sh-dw').style.display='none';}
+function saveShift(){if(S.shStaff&&S.shDay!==null&&S.shNewVal){SCHED[S.shStaff][S.shDay]=S.shNewVal;}closeShift();renderSched();}
+
+// ═══════ BOOKING ═══════
+function openBk(){S.bkStep=1;S.bkCust=null;S.bkPet=null;S.bkSvc=null;S.bkStaff=null;S.bkTime=null;document.getElementById('bk-ov').style.display='block';document.getElementById('bk-dw').style.display='flex';renderBk();}
+function closeBk(){document.getElementById('bk-ov').style.display='none';document.getElementById('bk-dw').style.display='none';}
+
+function renderBk(){
+  const body=document.getElementById('bk-body'),foot=document.getElementById('bk-foot');
+  const s=S.bkStep;
+  let steps=`<div class="steps"><div class="sd ${s>=1?(s>1?'dn':'act'):'td'}">1</div><div class="sl ${s>1?'dn':s===1?'act':'td'}"></div><div class="sd ${s>=2?(s>2?'dn':'act'):'td'}">2</div><div class="sl ${s>2?'dn':s===2?'act':'td'}"></div><div class="sd ${s>=3?'act':'td'}">3</div></div>`;
+
+  if(s===1){
+    const results=CUSTS.map((c,i)=>`<div class="sr2" onclick="S.bkCust=${i};S.bkPet=null;renderBk()"><div class="nm">${c.name} <span class="ph">${c.phone}</span></div><div style="margin-top:3px;font-size:11px;color:#94a3b8">${c.pets.join(' · ')}</div></div>`).join('');
+    let petSel='';
+    if(S.bkCust!==null){
+      petSel=`<div style="margin-top:16px"><div class="fl">选择宠物</div>${CUSTS[S.bkCust].pets.map((p,i)=>`<div class="sc2 ${S.bkPet===i?'sel':''}" onclick="S.bkPet=${i};renderBk()"><div class="mn">${p}</div></div>`).join('')}</div>`;
+    }
+    body.innerHTML=steps+`<div class="stt">第一步：锁定客户与宠物</div><div style="margin-bottom:16px"><div class="fl">搜索客户</div><input class="fi" placeholder="输入手机号或客户姓名..."></div><div style="border:1px solid #e9edf3;border-radius:10px;overflow:hidden">${results}</div>${petSel}`;
+    foot.innerHTML=`<button class="bc" onclick="closeBk()">取消</button><button class="btn-primary" style="${S.bkPet!==null?'':'opacity:.4;pointer-events:none'}" onclick="S.bkStep=2;renderBk()">下一步</button>`;
+  } else if(s===2){
+    const svcs=[{n:'医疗诊疗',ic:'🏥'},{n:'洗护美容',ic:'✂️'},{n:'疫苗驱虫',ic:'💉'}];
+    const stList=STAFF.map((st,i)=>`<div class="sc2 ${S.bkStaff===i?'sel':''}" onclick="S.bkStaff=${i};renderBk()"><div class="mn">${st.emoji} ${st.name}</div><div class="sb2">${st.role}${st.group==='groom'?' · 今日可接'+((5-APPTS.filter(a=>a.sid===st.id&&a.day===1&&a.status!=='cancelled').length))+' 单':''}</div></div>`).join('');
+    body.innerHTML=steps+`<div class="stt">第二步：选择服务与人员</div><div class="fl">服务大类</div><div style="display:flex;gap:8px;margin-bottom:20px">${svcs.map((sv,i)=>`<div class="sc2 ${S.bkSvc===i?'sel':''}" onclick="S.bkSvc=${i};renderBk()" style="flex:1;text-align:center"><div style="font-size:24px;margin-bottom:4px">${sv.ic}</div><div class="mn">${sv.n}</div></div>`).join('')}</div><div class="fl">指定人员</div>${stList}<div style="margin-top:8px"><label style="font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"> 随机安排（不指定人员）</label></div>`;
+    foot.innerHTML=`<button class="bc" onclick="S.bkStep=1;renderBk()">上一步</button><button class="btn-primary" style="${S.bkSvc!==null&&S.bkStaff!==null?'':'opacity:.4;pointer-events:none'}" onclick="S.bkStep=3;renderBk()">下一步</button>`;
+  } else {
+    const slots=['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+    const dis=['09:00','09:30','10:30','14:00'];
+    const chips=slots.map((sl,i)=>{const d=dis.includes(sl);const sel=S.bkTime===i;return `<div class="tc2 ${d?'dis':''} ${sel&&!d?'sel':''}" onclick="${d?'':`S.bkTime=${i};renderBk()`}">${sl}</div>`;}).join('');
+    const c=S.bkCust!==null?CUSTS[S.bkCust]:null;
+    const st=S.bkStaff!==null?STAFF[S.bkStaff]:null;
+    body.innerHTML=steps+`<div class="stt">第三步：锁定时间与确认</div>
+      <div style="background:#eff6ff;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:12px;display:flex;gap:20px"><span style="color:#64748b">客户</span><span style="font-weight:600;color:#0f172a">${c?c.name:''}</span><span style="color:#64748b;margin-left:12px">人员</span><span style="font-weight:600;color:#0f172a">${st?st.name:''}</span></div>
+      <div class="fl">可用时间段 <span style="font-weight:400;color:#94a3b8">（灰色=已约满/非排班）</span></div>
+      <div class="tg" style="margin-bottom:20px">${chips}</div>
+      <div class="fl">内部备注 <span style="font-weight:400;color:#94a3b8">（仅前台可见）</span></div>
+      <textarea class="fi" rows="3" placeholder="例：客户比较赶时间，尽量安排快点"></textarea>`;
+    foot.innerHTML=`<button class="bc" onclick="S.bkStep=2;renderBk()">上一步</button><button class="btn-primary" style="background:#059669;${S.bkTime!==null?'':'opacity:.4;pointer-events:none'}" onclick="alert('✅ 预约成功！已向客户小程序推送预约通知');closeBk()">确认预约</button>`;
+  }
+}
+
+// ═══════ STATUS DRAWER ═══════
+function openSt(aid){
+  const a=APPTS.find(x=>x.id===aid);if(!a)return;
+  document.getElementById('st-title').textContent='预约详情 - '+a.cust;
+  const SL2={pending:'待到店',checked:'已签到',serving:'服务中',cancelled:'已取消'};
+  const SBG={pending:'#f1f5f9',checked:'#d1fae5',serving:'#dbeafe',cancelled:'#fee2e2'};
+  const STC={pending:'#475569',checked:'#065f46',serving:'#1d4ed8',cancelled:'#991b1b'};
+  const staff=STAFF.find(s=>s.id===a.sid);
+
+  let acts='';
+  if(a.status==='pending') acts=`<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-primary" style="flex:1;background:#059669;justify-content:center" onclick="doCheckin(${a.id});closeSt()">✓ 到店签到</button><button class="btn-primary" style="flex:1;background:#334155;justify-content:center">改签时间</button><button class="btn-primary" style="flex:1;background:#dc2626;justify-content:center" onclick="doCancel(${a.id});closeSt()">取消预约</button></div>`;
+  else if(a.status==='checked') acts=`<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-primary" style="flex:1;background:#2563eb;justify-content:center" onclick="doServe(${a.id});closeSt()">⚡ 开始服务</button></div><div style="margin-top:10px;padding:10px 14px;border-radius:8px;background:#ecfdf5;font-size:12px;color:#065f46">✓ 已签到 · 排队号已生成 · 等待叫号中</div>`;
+  else if(a.status==='serving') acts=`<div style="margin-top:16px;padding:12px;border-radius:8px;background:#dbeafe;font-size:13px;color:#1d4ed8;text-align:center;font-weight:600">⚡ 服务进行中...</div>`;
+  else acts=`<div style="margin-top:16px;padding:12px;border-radius:8px;background:#fee2e2;font-size:13px;color:#991b1b;text-align:center;font-weight:600">已取消</div>`;
+
+  document.getElementById('st-body').innerHTML=`
+    <div style="text-align:center;margin-bottom:20px"><span class="badge" style="background:${SBG[a.status]};color:${STC[a.status]};padding:6px 16px;font-size:13px">${SL2[a.status]}</span></div>
+    <div style="background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">客户</div><div style="font-weight:600">${a.cust}</div></div>
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">电话</div><div style="font-weight:600">${a.phone}</div></div>
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">宠物</div><div style="font-weight:600">${a.pet}</div></div>
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">服务</div><div style="font-weight:600">${a.svc}</div></div>
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">时间</div><div style="font-weight:600">${a.time} (${a.dur*30}分钟)</div></div>
+        <div><div style="font-size:11px;color:#94a3b8;margin-bottom:2px">服务人员</div><div style="font-weight:600">${staff?staff.name:''}</div></div>
+      </div>
+    </div>
+    ${a.note?`<div style="padding:10px 14px;border-radius:8px;background:#fef3c7;font-size:12px;color:#92400e;margin-bottom:12px">📝 ${a.note}</div>`:''}
+    ${a.status==='pending'?`<div><div class="fl">取消原因</div><select class="fi"><option>请选择...</option><option>客户改期</option><option>突发情况</option><option>客户爽约</option></select></div>`:''}
+    ${acts}
+  `;
+  document.getElementById('st-ov').style.display='block';
+  document.getElementById('st-dw').style.display='flex';
+}
+function closeSt(){document.getElementById('st-ov').style.display='none';document.getElementById('st-dw').style.display='none';}
+
+function doCheckin(id){const a=APPTS.find(x=>x.id===id);if(a)a.status='checked';renderDash();}
+function doCancel(id){const a=APPTS.find(x=>x.id===id);if(a){a.status='cancelled';a.note=a.note||'前台取消';}renderDash();}
+function doServe(id){const a=APPTS.find(x=>x.id===id);if(a)a.status='serving';renderDash();}
+
+// ═══════ MODULE SWITCH ═══════
+function switchMod(m){
+  S.mod=m;
+  document.querySelectorAll('.mod-tab').forEach((e,i)=>e.classList.toggle('active',i===(m==='dash'?0:1)));
+  document.getElementById('pg-dash').style.display=m==='dash'?'block':'none';
+  document.getElementById('pg-sched').style.display=m==='sched'?'block':'none';
+  if(m==='dash')renderDash();else renderSched();
+}
+
+
+
+// ═══════════ MODULE SWITCHING ═══════════
+function goModule(mod){
+  state.currentModule = mod;
+  document.getElementById('module-crm').style.display = mod==='crm' ? 'block' : 'none';
+  document.getElementById('module-booking').style.display = mod==='booking' ? 'block' : 'none';
+  document.querySelectorAll('.topnav-menu button').forEach(function(b){ b.classList.remove('active'); });
+  if(mod==='crm') document.getElementById('nav-crm').classList.add('active');
+  else if(mod==='booking'){ document.getElementById('nav-bk').classList.add('active'); initBookingPage(); }
+}
+function initBookingPage(){
+  var el = document.getElementById('module-booking');
+  var d = S.mod==='dash';
+  el.innerHTML = '<div class="breadcrumb"><span>工作台</span><svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="active">预约与排班管理</span></div>'
+    + '<div class="mod-tabs"><button class="mod-tab '+(d?'active':'')+'" onclick="switchMod(\'dash\')">预约看板</button><button class="mod-tab '+(!d?'active':'')+'" onclick="switchMod(\'sched\')">员工排班</button></div>'
+    + '<div id="pg-dash"'+(!d?' style="display:none"':'')+'></div><div id="pg-sched"'+(d?' style="display:none"':'')+'></div>';
+  if(d) renderDash(); else renderSched();
+}
+
+state.currentModule="crm";
 renderList();
 </script>
 </body>
