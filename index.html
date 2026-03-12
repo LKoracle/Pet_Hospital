@@ -169,7 +169,7 @@
 /* Module tabs */
 .mod-tabs{display:flex;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e9edf3;margin-bottom:24px;}
 .mod-tab{flex:1;padding:14px 20px;border:none;font-size:14px;font-weight:600;background:#fff;color:#64748b;transition:all .15s;border-right:1px solid #e9edf3;}
-.mod-tab:last-child{border-right:none;} .mod-tab.active{background:#2563eb;color:#fff;}
+.mod-tab:last-child{border-right:none;} .mod-tab.active{background:#2563eb;color:#fff;} .mod-tab.green-tab{background:#059669;color:#fff;}
 
 /* Stats */
 .stats-bar{display:flex;gap:16px;margin-bottom:20px;}
@@ -1051,7 +1051,7 @@ var GROOM_COLS = [
 function initGroomPage(){
   var el=document.getElementById('module-groom');
   el.innerHTML='<div class="breadcrumb"><span>工作台</span><svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="active">洗护美容管理</span></div>'
-    +'<div class="mod-tabs"><button class="mod-tab '+(GS.tab==='kanban'?'active':'')+'" onclick="GS.tab=\'kanban\';initGroomPage()">流程看板</button><button class="mod-tab '+(GS.tab==='pricing'?'active':'')+'" onclick="GS.tab=\'pricing\';initGroomPage()">服务项目与定价</button><button class="mod-tab '+(GS.tab==='log'?'active':'')+'" onclick="GS.tab=\'log\';initGroomPage()">工作记录</button></div>'
+    +'<div class="mod-tabs"><button class="mod-tab '+(GS.tab==='kanban'?'active green-tab':'')+'" onclick="GS.tab=\'kanban\';initGroomPage()">流程看板</button><button class="mod-tab '+(GS.tab==='pricing'?'active':'')+'" onclick="GS.tab=\'pricing\';initGroomPage()">服务项目与定价</button><button class="mod-tab '+(GS.tab==='log'?'active':'')+'" onclick="GS.tab=\'log\';initGroomPage()">工作记录</button></div>'
     +'<div id="groom-content"></div>';
   if(GS.tab==='kanban') renderKanban();
   else if(GS.tab==='pricing') renderPricing();
