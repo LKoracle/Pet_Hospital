@@ -336,7 +336,7 @@
   <div class="topnav-logo"><span>Paw</span>Clinic</div>
   <div class="topnav-menu">
     <button>工作台</button><button id="nav-bk" onclick="goModule('booking')">预约排班</button><button class="active" id="nav-crm" onclick="goModule('crm')">客户宠物</button>
-    <button id="nav-med" onclick="goModule('medical')">医疗管理</button><button id="nav-groom" onclick="goModule('groom')">洗护美容</button><button id="nav-inv" onclick="goModule('inventory')">进销存</button><button>收银</button><button>营销</button>
+    <button id="nav-med" onclick="goModule('medical')">医疗管理</button><button id="nav-groom" onclick="goModule('groom')">洗护美容</button><button id="nav-inv" onclick="goModule('inventory')">进销存</button><button id="nav-pos" onclick="goModule('pos')">收银</button><button>营销</button>
   </div>
 </div>
 <div class="page-container">
@@ -349,6 +349,7 @@
   <div id="module-groom" style="display:none"></div>
   <div id="module-inventory" style="display:none"></div>
   <div id="module-medical" style="display:none"></div>
+  <div id="module-pos" style="display:none"></div>
 </div>
 
 
@@ -1004,12 +1005,14 @@ function goModule(mod){
   document.getElementById('module-groom').style.display = mod==='groom' ? 'block' : 'none';
   document.getElementById('module-inventory').style.display = mod==='inventory' ? 'block' : 'none';
   document.getElementById('module-medical').style.display = mod==='medical' ? 'block' : 'none';
+  document.getElementById('module-pos').style.display = mod==='pos' ? 'block' : 'none';
   document.querySelectorAll('.topnav-menu button').forEach(function(b){ b.classList.remove('active'); });
   if(mod==='crm') document.getElementById('nav-crm').classList.add('active');
   else if(mod==='booking'){ document.getElementById('nav-bk').classList.add('active'); initBookingPage(); }
   else if(mod==='groom'){ document.getElementById('nav-groom').classList.add('active'); initGroomPage(); }
   else if(mod==='inventory'){ document.getElementById('nav-inv').classList.add('active'); initInventoryPage(); }
   else if(mod==='medical'){ document.getElementById('nav-med').classList.add('active'); initMedicalPage(); }
+  else if(mod==='pos'){ document.getElementById('nav-pos').classList.add('active'); initPosPage(); }
 }
 function initBookingPage(){
   var el = document.getElementById('module-booking');
@@ -1920,6 +1923,212 @@ function openMedHistDetail(id){
   document.getElementById('st-body').innerHTML=html;
   document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';
 }
+
+
+// ═══════════════════════════════════════════
+
+// POS MODULE (收银与财务管理)
+var POS={tab:'checkout',selectedOrder:null,shiftSub:'shifts',commSub:'data',commMonth:'2025-03',bizDate:'',bizSearch:''};
+
+var POS_PENDING=[
+  {id:'ORD-0311-001',customer:'张晓明',phone:'138****6721',isTemp:false,level:'黄金会员',balance:2680,items:[{name:'皮肤科诊疗费',cat:'medical',price:80,qty:1},{name:'皮肤刮片镜检',cat:'medical',price:60,qty:1},{name:'特比萘芬喷剂',cat:'medical',price:128,qty:1},{name:'伊曲康唑胶囊 x21',cat:'medical',price:112,qty:1},{name:'皇家金毛成犬粮 12kg',cat:'retail',price:420,qty:1}],source:'医疗+零售',total:800,status:'pending',cards:[{name:'洗澡10次卡',remain:3}],coupons:['满500减30'],points:1340},
+  {id:'ORD-0311-002',customer:'李美琪',phone:'139****8832',isTemp:false,level:'普通会员',balance:500,items:[{name:'耳道复查诊疗费',cat:'medical',price:50,qty:1},{name:'耳肤灵滴耳液',cat:'medical',price:68,qty:1}],source:'医疗',total:118,status:'pending',cards:[],coupons:[],points:260},
+  {id:'ORD-0311-003',customer:'王建国',phone:'136****4451',isTemp:false,level:'钻石会员',balance:8200,items:[{name:'基础洗浴(橘猫)',cat:'groom',price:88,qty:1},{name:'拔耳毛',cat:'groom',price:20,qty:1}],source:'洗护',total:108,status:'pending',cards:[{name:'洗澡20次卡',remain:12}],coupons:['洗护9折券'],points:5680},
+  {id:'ORD-0311-004',customer:'赵薇薇',phone:'158****2209',isTemp:false,level:'普通会员',balance:0,items:[{name:'卫佳五联疫苗接种',cat:'medical',price:80,qty:1},{name:'体检基础套餐',cat:'medical',price:180,qty:1}],source:'医疗',total:260,status:'pending',cards:[],coupons:[],points:80},
+  {id:'ORD-0311-005',customer:'周美美',phone:'133****5567',isTemp:false,level:'普通会员',balance:200,items:[{name:'住院费(犬细小-第5天)',cat:'medical',price:500,qty:1},{name:'静脉输液 x5',cat:'medical',price:250,qty:1},{name:'细小抗体 x5',cat:'medical',price:750,qty:1}],source:'住院',total:1500,status:'pending',cards:[],coupons:[],points:100}
+];
+
+var POS_COMPLETED=[
+  {id:'ORD-0311-010',date:'2025-03-11',time:'09:15',customer:'陈大方',phone:'135****7720',pet:'黑豆',total:85,payment:'微信支付',items:[{name:'福来恩驱虫 x1',cat:'retail',price:85,qty:1}],cashier:'前台-小李'},
+  {id:'ORD-0311-011',date:'2025-03-11',time:'08:40',customer:'王建国',phone:'136****4451',pet:'大橘',total:350,payment:'会员余额',items:[{name:'皇家室内成猫粮 x1',cat:'retail',price:350,qty:1}],cashier:'前台-小李'},
+  {id:'ORD-0311-012',date:'2025-03-11',time:'08:20',customer:'何小花',phone:'136****2288',pet:'布丁',total:0,payment:'次卡抵扣',items:[{name:'猫咪洗护(次卡)',cat:'groom',price:88,qty:1}],cashier:'前台-小李'},
+  {id:'ORD-0310-001',date:'2025-03-10',time:'14:20',customer:'张晓明',phone:'138****6721',pet:'旺财',total:520,payment:'微信支付',items:[{name:'年度体检套餐',cat:'medical',price:520,qty:1}],cashier:'前台-小王'},
+  {id:'ORD-0310-002',date:'2025-03-10',time:'11:00',customer:'临时客户',phone:'—',pet:'—',total:128,payment:'现金',items:[{name:'猫粮试吃装 x2',cat:'retail',price:48,qty:2},{name:'猫条零食 x1',cat:'retail',price:28,qty:1},{name:'洁齿骨 x1',cat:'retail',price:35,qty:1}],cashier:'前台-小王'},
+  {id:'ORD-0310-003',date:'2025-03-10',time:'10:30',customer:'李美琪',phone:'139****8832',pet:'豆豆',total:210,payment:'微信支付',items:[{name:'耳科诊疗',cat:'medical',price:50,qty:1},{name:'耳肤灵',cat:'medical',price:68,qty:1},{name:'洗耳液',cat:'medical',price:42,qty:1},{name:'泰迪造型',cat:'groom',price:180,qty:1}],cashier:'前台-小李'},
+  {id:'ORD-0309-001',date:'2025-03-09',time:'15:00',customer:'王建国',phone:'136****4451',pet:'三宝',total:120,payment:'会员余额',items:[{name:'猫三联疫苗',cat:'medical',price:120,qty:1}],cashier:'前台-小李'}
+];
+
+var POS_SHIFTS=[
+  {id:'SH-0311-AM',date:'2025-03-11',shift:'早班',cashier:'前台-小李',start:'08:00',end:'',status:'active',cashIn:0,wechat:785,alipay:0,memberPay:350,cardDeduct:108,recharge:0,totalOrders:3},
+  {id:'SH-0310-PM',date:'2025-03-10',shift:'晚班',cashier:'前台-小王',start:'14:00',end:'21:00',status:'closed',cashIn:200,wechat:1280,alipay:350,memberPay:680,cardDeduct:88,recharge:500,totalOrders:8,expectedCash:200,actualCash:200,diff:0},
+  {id:'SH-0310-AM',date:'2025-03-10',shift:'早班',cashier:'前台-小李',start:'08:00',end:'14:00',status:'closed',cashIn:150,wechat:960,alipay:200,memberPay:520,cardDeduct:176,recharge:1000,totalOrders:6,expectedCash:150,actualCash:140,diff:-10,diffReason:'找零误差'}
+];
+
+var POS_DAILY=[
+  {date:'2025-03-11',totalRevenue:1243,realIncome:893,memberConsume:350,recharge:0,medical:568,groom:108,retail:567,orders:6,newMembers:0},
+  {date:'2025-03-10',totalRevenue:4180,realIncome:2940,memberConsume:1200,recharge:1500,medical:2100,groom:680,retail:1400,orders:14,newMembers:1},
+  {date:'2025-03-09',totalRevenue:3560,realIncome:2680,memberConsume:880,recharge:800,medical:1800,groom:960,retail:800,orders:11,newMembers:0}
+];
+
+var POS_COMMISSION_RULES=[
+  {id:1,period:'2025-03-01 ~ 2025-03-31',label:'2025年3月',rules:[
+    {role:'主治医师',item:'处方药',rate:5},{role:'主治医师',item:'化验单',rate:10},{role:'主治医师',item:'手术',rate:15},
+    {role:'全科医师',item:'处方药',rate:5},{role:'全科医师',item:'化验单',rate:8},
+    {role:'主理美容师',item:'洗护',rate:15},{role:'主理美容师',item:'造型',rate:18},
+    {role:'助理美容师',item:'洗护',rate:5},{role:'助理美容师',item:'造型',rate:8},
+    {role:'前台',item:'零售商品',rate:3},{role:'前台',item:'会员充值',rate:2},{role:'前台',item:'套餐卡',rate:5}
+  ]},
+  {id:2,period:'2025-01-01 ~ 2025-02-28',label:'2025年1-2月',rules:[
+    {role:'主治医师',item:'处方药',rate:4},{role:'主治医师',item:'化验单',rate:8},{role:'主治医师',item:'手术',rate:12},
+    {role:'全科医师',item:'处方药',rate:4},{role:'全科医师',item:'化验单',rate:6},
+    {role:'主理美容师',item:'洗护',rate:12},{role:'主理美容师',item:'造型',rate:15},
+    {role:'助理美容师',item:'洗护',rate:4},{role:'助理美容师',item:'造型',rate:6},
+    {role:'前台',item:'零售商品',rate:2},{role:'前台',item:'会员充值',rate:1},{role:'前台',item:'套餐卡',rate:3}
+  ]}
+];
+
+var POS_COMMISSION_DATA={
+  '2025-03':[
+    {staff:'李医生',role:'主治医师',orders:42,revenue:18600,commission:1580},
+    {staff:'王医生',role:'全科医师',orders:38,revenue:15200,commission:1120},
+    {staff:'小陈',role:'主理美容师',orders:56,revenue:12800,commission:1920},
+    {staff:'小张',role:'助理美容师',orders:48,revenue:9600,commission:720},
+    {staff:'前台-小李',role:'前台',orders:120,revenue:45000,commission:680},
+    {staff:'前台-小王',role:'前台',orders:95,revenue:38000,commission:540}
+  ],
+  '2025-02':[
+    {staff:'李医生',role:'主治医师',orders:38,revenue:16200,commission:1260},
+    {staff:'王医生',role:'全科医师',orders:35,revenue:13800,commission:920},
+    {staff:'小陈',role:'主理美容师',orders:50,revenue:11200,commission:1344},
+    {staff:'小张',role:'助理美容师',orders:42,revenue:8400,commission:504},
+    {staff:'前台-小李',role:'前台',orders:105,revenue:40000,commission:520},
+    {staff:'前台-小王',role:'前台',orders:88,revenue:35000,commission:420}
+  ],
+  '2025-01':[
+    {staff:'李医生',role:'主治医师',orders:40,revenue:17000,commission:1320},
+    {staff:'王医生',role:'全科医师',orders:36,revenue:14500,commission:980},
+    {staff:'小陈',role:'主理美容师',orders:48,revenue:10800,commission:1296},
+    {staff:'小张',role:'助理美容师',orders:40,revenue:8000,commission:480},
+    {staff:'前台-小李',role:'前台',orders:110,revenue:42000,commission:560},
+    {staff:'前台-小王',role:'前台',orders:90,revenue:36000,commission:440}
+  ]
+};
+
+function initPosPage(){
+  var el=document.getElementById('module-pos');
+  el.innerHTML='<div class="breadcrumb"><span>工作台</span><svg class="bc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span class="active">收银与财务管理</span></div>'
+    +'<div class="mod-tabs">'
+    +'<button class="mod-tab '+(POS.tab==='checkout'?'active':'')+'" onclick="POS.tab=\'checkout\';initPosPage()">收银台</button>'
+    +'<button class="mod-tab '+(POS.tab==='biz'?'active':'')+'" onclick="POS.tab=\'biz\';initPosPage()">营业查询</button>'
+    +'<button class="mod-tab '+(POS.tab==='shift'?'active':'')+'" onclick="POS.tab=\'shift\';initPosPage()">交接班与日结</button>'
+    +'<button class="mod-tab '+(POS.tab==='commission'?'active':'')+'" onclick="POS.tab=\'commission\';initPosPage()">提成核算</button>'
+    +'</div><div id="pos-content"></div>';
+  if(POS.tab==='checkout') renderPosCheckout(); else if(POS.tab==='biz') renderPosBiz(); else if(POS.tab==='shift') renderPosShift(); else renderPosCommission();
+}
+
+// ═══ 收银台 ═══
+function renderPosCheckout(){ var el=document.getElementById('pos-content');
+  var sel=POS.selectedOrder;
+  var cards=POS_PENDING.map(function(o){var isA=sel&&sel.id===o.id;var sc=o.source.includes('医疗')?'#1d4ed8':o.source.includes('洗护')?'#059669':o.source.includes('住院')?'#dc2626':'#64748b';
+    return '<div style="padding:10px 12px;border-radius:10px;margin-bottom:5px;cursor:pointer;border:2px solid '+(isA?'#2563eb':'#e9edf3')+';background:'+(isA?'#eff6ff':'#fff')+'" onclick="POS.selectedOrder=POS_PENDING.find(function(x){return x.id===\''+o.id+'\'});renderPosCheckout()"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:13px;font-weight:700">'+o.customer+(o.isTemp?' <span style="font-size:10px;color:#d97706">临时</span>':'')+'</span><span style="font-size:14px;font-weight:800">¥'+o.total+'</span></div><div style="font-size:10px;color:#94a3b8">'+o.phone+' · <span style="color:'+sc+';font-weight:600">'+o.source+'</span> · '+o.items.length+'项</div></div>';
+  }).join('');
+  var compH='<div style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0"><div style="font-size:10px;font-weight:600;color:#059669;margin-bottom:4px">✅ 今日已结 ('+POS_COMPLETED.filter(function(c){return c.date==='2025-03-11';}).length+')</div>';
+  POS_COMPLETED.filter(function(c){return c.date==='2025-03-11';}).forEach(function(c){compH+='<div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0"><span style="color:#334155">'+c.time+' '+c.customer+'</span><span style="font-weight:600">¥'+c.total+'</span></div>';});
+  compH+='</div>';
+  var leftH='<div style="width:280px;flex-shrink:0;background:#fff;border-radius:14px;border:1px solid #e9edf3;display:flex;flex-direction:column;max-height:calc(100vh - 230px)"><div style="padding:12px 14px;border-bottom:1px solid #e9edf3;display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">🧾 待结账 ('+POS_PENDING.length+')</div><button class="btn-primary" style="font-size:10px;padding:4px 10px" onclick="openPosTempOrder()">+ 新建订单</button></div><div style="flex:1;overflow-y:auto;padding:8px">'+cards+compH+'</div></div>';
+
+  var rightH='<div style="flex:1;min-width:0">';
+  if(!sel){rightH+='<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:60px;text-align:center;color:#94a3b8">👈 选择待结账客户，或点击"新建订单"为临时客户开单</div>';
+  } else {
+    var lc=sel.level==='钻石会员'?{bg:'#ede9fe',c:'#6d28d9'}:sel.level==='黄金会员'?{bg:'#fef3c7',c:'#92400e'}:{bg:'#f1f5f9',c:'#475569'};
+    rightH+='<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:14px 18px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><span style="font-size:15px;font-weight:800">'+sel.customer+'</span> '+(sel.isTemp?'<span class="badge" style="background:#fef3c7;color:#92400e">临时客户</span>':'<span class="badge" style="background:'+lc.bg+';color:'+lc.c+'">'+sel.level+'</span>')+'<div style="font-size:11px;color:#94a3b8;margin-top:3px">'+sel.phone+(sel.isTemp?'':' · 余额¥'+sel.balance+' · 积分'+sel.points)+'</div></div><div style="font-size:11px;color:#94a3b8">'+sel.id+'</div></div></div>';
+    var ci=function(c){return c==='medical'?'🏥':c==='groom'?'✂️':'🛒';};
+    var iR=sel.items.map(function(it){return '<tr><td style="font-size:12px">'+ci(it.cat)+' '+it.name+'</td><td style="text-align:center;font-size:12px">'+it.qty+'</td><td style="text-align:right;font-size:12px">¥'+it.price+'</td><td style="text-align:right;font-weight:700">¥'+(it.price*it.qty)+'</td></tr>';}).join('');
+    rightH+='<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:hidden;margin-bottom:10px"><div style="padding:10px 14px;border-bottom:1px solid #e9edf3;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">📦 明细</span><button style="padding:3px 10px;border-radius:6px;border:1px dashed #93c5fd;background:#eff6ff;color:#2563eb;font-size:10px;font-weight:600;cursor:pointer" onclick="openPosAddItem()">+ 加单</button></div><table class="data-table"><thead><tr><th>项目</th><th style="text-align:center">数量</th><th style="text-align:right">单价</th><th style="text-align:right">小计</th></tr></thead><tbody>'+iR+'</tbody></table><div style="padding:10px 14px;border-top:1px solid #e9edf3;display:flex;justify-content:space-between"><span style="font-size:12px;color:#64748b">'+sel.items.length+'项</span><span style="font-size:17px;font-weight:800">¥'+sel.total+'</span></div></div>';
+    if(!sel.isTemp){
+      var aH='<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:12px 16px;margin-bottom:10px"><div style="font-size:12px;font-weight:700;margin-bottom:8px">💳 可用资产</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+      if(sel.balance>0) aH+='<div style="padding:8px 12px;border-radius:6px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:11px"><span style="color:#059669;font-weight:700">¥'+sel.balance+'</span> 余额</div>';
+      sel.cards.forEach(function(c){aH+='<div style="padding:8px 12px;border-radius:6px;background:#eff6ff;border:1px solid #bfdbfe;font-size:11px"><span style="color:#2563eb;font-weight:700">'+c.name+'</span> 剩'+c.remain+'次</div>';});
+      sel.coupons.forEach(function(c){aH+='<div style="padding:8px 12px;border-radius:6px;background:#fef3c7;border:1px solid #fde68a;font-size:11px;color:#92400e;font-weight:600">🎫 '+c+'</div>';});
+      aH+='</div></div>';rightH+=aH;
+    }
+    rightH+='<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;padding:14px 18px"><div style="display:flex;gap:8px;margin-bottom:10px"><button style="flex:1;padding:12px;border-radius:10px;border:2px solid #059669;background:#f0fdf4;font-size:13px;font-weight:700;color:#059669;cursor:pointer">微信</button><button style="flex:1;padding:12px;border-radius:10px;border:2px solid #2563eb;background:#eff6ff;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer">余额</button><button style="flex:1;padding:12px;border-radius:10px;border:2px solid #d97706;background:#fffbeb;font-size:13px;font-weight:700;color:#d97706;cursor:pointer">现金</button><button style="flex:1;padding:12px;border-radius:10px;border:2px solid #7c3aed;background:#faf5ff;font-size:13px;font-weight:700;color:#7c3aed;cursor:pointer" onclick="openPosMixPay()">混合</button></div><div style="display:flex;gap:6px;margin-bottom:10px"><button style="flex:1;padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;font-size:10px;color:#64748b;cursor:pointer">🎫 优惠券</button><button style="flex:1;padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;font-size:10px;color:#64748b;cursor:pointer">📇 次卡</button><button style="flex:1;padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;font-size:10px;color:#64748b;cursor:pointer" onclick="openPosDiscount()">🏷️ 折扣</button></div><div style="display:flex;gap:8px"><button class="btn-primary" style="flex:1;justify-content:center;font-size:14px;padding:11px" onclick="doPosSettle()">✅ 收款 ¥'+sel.total+'</button><button class="btn-outline" style="padding:11px">🖨️</button></div></div>';
+  }
+  rightH+='</div>';
+  el.innerHTML='<div style="display:flex;gap:16px;align-items:flex-start">'+leftH+rightH+'</div>';
+}
+
+function openPosTempOrder(){document.getElementById('st-title').textContent='新建临时订单';document.getElementById('st-body').innerHTML='<div style="padding:10px 14px;border-radius:8px;background:#fffbeb;font-size:12px;color:#92400e;margin-bottom:16px;border:1px solid #fde68a">💡 可为未注册的临时客户直接开单，也可搜索已有客户关联</div><div class="form-grid"><div><label class="form-label">客户类型</label><select class="form-input" id="pos-temp-type" onchange="document.getElementById(\'pos-temp-cust\').style.display=this.value===\'existing\'?\'block\':\'none\'"><option value="temp">临时客户（散客）</option><option value="existing">关联已有客户</option></select></div><div id="pos-temp-cust" style="display:none"><label class="form-label">搜索客户</label><input class="form-input" placeholder="手机号或姓名..."></div></div><div style="margin-top:16px"><div class="form-label">添加商品/服务</div><div style="background:#f8fafc;border-radius:10px;padding:12px;border:1px solid #f1f5f9"><div style="display:flex;gap:8px;margin-bottom:10px"><input class="form-input" placeholder="扫码或搜索商品名称..." style="flex:1"><button class="btn-primary" style="font-size:12px;padding:6px 14px">添加</button></div><div style="font-size:12px;color:#94a3b8;text-align:center;padding:12px">扫码枪扫描或手动搜索添加项目</div></div></div><div class="form-grid" style="margin-top:12px"><div><label class="form-label">手动加项名称</label><input class="form-input" placeholder="如：寄养费"></div><div><label class="form-label">金额</label><input type="number" class="form-input" placeholder="0"></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="createTempOrder()" style="flex:1">创建订单</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+
+function createTempOrder(){var newId='ORD-0311-T'+String(POS_PENDING.length+1).padStart(2,'0');POS_PENDING.push({id:newId,customer:'临时客户',phone:'—',isTemp:true,level:'散客',balance:0,items:[{name:'待添加项目',cat:'retail',price:0,qty:1}],source:'零售',total:0,status:'pending',cards:[],coupons:[],points:0});closeSt();POS.selectedOrder=POS_PENDING[POS_PENDING.length-1];renderPosCheckout();}
+
+function openPosAddItem(){document.getElementById('st-title').textContent='临时加单';document.getElementById('st-body').innerHTML='<div style="padding:10px 14px;border-radius:8px;background:#eff6ff;font-size:12px;color:#1d4ed8;margin-bottom:16px">扫码或手动添加</div><div class="form-grid"><div class="full"><label class="form-label">搜索商品</label><input class="form-input" placeholder="扫码或输入名称..."></div><div><label class="form-label">数量</label><input type="number" class="form-input" value="1"></div><div><label class="form-label">手动加项</label><input class="form-input" placeholder="名称"></div><div><label class="form-label">金额</label><input type="number" class="form-input" placeholder="0"></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">添加</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+function openPosMixPay(){var sel=POS.selectedOrder;if(!sel)return;document.getElementById('st-title').textContent='混合支付';document.getElementById('st-body').innerHTML='<div style="padding:10px 14px;border-radius:8px;background:#f8fafc;font-size:14px;font-weight:800;text-align:center;margin-bottom:16px">应收 <span style="color:#dc2626;font-size:20px">¥'+sel.total+'</span></div><div class="form-grid"><div><label class="form-label">微信/支付宝</label><input type="number" class="form-input" value="0"></div><div><label class="form-label">现金</label><input type="number" class="form-input" value="0"></div><div><label class="form-label">会员余额</label><input type="number" class="form-input" value="0" max="'+sel.balance+'"><div style="font-size:10px;color:#94a3b8;margin-top:2px">可用¥'+sel.balance+'</div></div><div><label class="form-label">次卡抵扣</label><input type="number" class="form-input" value="0"></div></div><div style="margin-top:10px;padding:8px 12px;border-radius:6px;background:#fef3c7;font-size:11px;color:#92400e">各项之和需等于应收总额</div><div style="display:flex;gap:8px;margin-top:20px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1;background:#059669">确认</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+function openPosDiscount(){document.getElementById('st-title').textContent='整单折扣';document.getElementById('st-body').innerHTML='<div style="padding:8px 12px;border-radius:6px;background:#fef3c7;font-size:11px;color:#92400e;margin-bottom:16px">改价需店长授权，操作记录日志</div><div class="form-grid"><div><label class="form-label">方式</label><select class="form-input"><option>百分比折扣</option><option>固定减免</option><option>抹零</option></select></div><div><label class="form-label">值</label><input type="number" class="form-input" value="95"></div><div><label class="form-label">授权人</label><select class="form-input"><option>店长</option></select></div><div class="full"><label class="form-label">原因 *</label><textarea class="form-input" rows="2" placeholder="必填..."></textarea></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">确认</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+function doPosSettle(){var sel=POS.selectedOrder;if(!sel)return;POS_COMPLETED.unshift({id:sel.id,date:'2025-03-11',time:('0'+new Date().getHours()).slice(-2)+':'+('0'+new Date().getMinutes()).slice(-2),customer:sel.customer,phone:sel.phone||'—',pet:'—',total:sel.total,payment:'微信支付',items:sel.items,cashier:'前台-小李'});POS_PENDING=POS_PENDING.filter(function(o){return o.id!==sel.id;});POS.selectedOrder=null;alert('✅ 收款成功');renderPosCheckout();}
+
+// ═══ 营业查询 ═══
+function renderPosBiz(){ var el=document.getElementById('pos-content');
+  var sD=POS.bizDate||'';var sK=POS.bizSearch||'';
+  var all=POS_COMPLETED.filter(function(o){return (!sD||o.date===sD)&&(!sK||o.customer.includes(sK)||(o.pet&&o.pet.includes(sK))||(o.phone&&o.phone.includes(sK)));});
+  var totalAmt=all.reduce(function(s,o){return s+o.total;},0);
+  var rows=all.map(function(o){
+    return '<tr><td style="font-weight:600;color:#2563eb;font-size:12px">'+o.id+'</td><td style="color:#64748b">'+o.date+'</td><td style="color:#64748b;font-size:12px">'+o.time+'</td><td style="font-weight:500">'+o.customer+'</td><td style="font-size:12px;color:#64748b">'+(o.pet||'—')+'</td><td style="font-size:12px;color:#334155;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(typeof o.items==='string'?o.items:o.items.map(function(i){return i.name;}).join('、'))+'</td><td style="text-align:right;font-weight:700">¥'+o.total+'</td><td style="font-size:12px;color:#64748b">'+o.payment+'</td><td style="font-size:12px;color:#64748b">'+o.cashier+'</td><td><button class="btn-table blue" onclick="openPosBizDetail(\''+o.id+'\')">明细</button></td></tr>';
+  }).join('');
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700">📊 营业查询</div><input type="date" value="'+sD+'" onchange="POS.bizDate=this.value;renderPosBiz()" style="padding:6px 10px;border-radius:8px;border:1px solid #e2e8f0;font-size:12px"><button style="padding:5px 12px;border-radius:6px;border:1px solid '+(!sD?'#2563eb':'#e2e8f0')+';background:'+(!sD?'#eff6ff':'#fff')+';color:'+(!sD?'#2563eb':'#64748b')+';font-size:12px;font-weight:600;cursor:pointer" onclick="POS.bizDate=\'\';renderPosBiz()">全部日期</button></div><div style="display:flex;gap:8px;align-items:center"><div class="search-box" style="min-width:220px;padding:6px 10px"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="搜索客户、宠物、手机号..." value="'+(sK||'')+'" oninput="POS.bizSearch=this.value;renderPosBiz()" style="font-size:12px"></div><button class="btn-outline" style="font-size:12px">导出</button></div></div>'
+    +'<div style="display:flex;gap:16px;margin-bottom:14px"><div style="background:#fff;border-radius:10px;padding:12px 18px;border:1px solid #e9edf3;display:flex;align-items:center;gap:10px"><div style="font-size:12px;color:#94a3b8">筛选结果</div><div style="font-size:18px;font-weight:800">'+all.length+'<span style="font-size:12px;color:#94a3b8;font-weight:400"> 笔</span></div></div><div style="background:#fff;border-radius:10px;padding:12px 18px;border:1px solid #e9edf3;display:flex;align-items:center;gap:10px"><div style="font-size:12px;color:#94a3b8">合计金额</div><div style="font-size:18px;font-weight:800;color:#059669">¥'+totalAmt.toLocaleString()+'</div></div></div>'
+    +'<div class="data-table-wrap"><table class="data-table"><thead><tr><th>订单号</th><th>日期</th><th>时间</th><th>客户</th><th>宠物</th><th>项目</th><th style="text-align:right">金额</th><th>支付</th><th>收银</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table>'+(all.length===0?'<div class="empty-state">暂无匹配订单</div>':'')+'</div>';
+}
+
+function openPosBizDetail(id){
+  var o=POS_COMPLETED.find(function(x){return x.id===id;});if(!o)return;
+  document.getElementById('st-title').textContent='订单明细 - '+o.id;
+  var itemsArr=typeof o.items==='string'?[{name:o.items,qty:1,price:o.total,cat:'retail'}]:o.items;
+  var iH=itemsArr.map(function(it){var ic=it.cat==='medical'?'🏥':it.cat==='groom'?'✂️':'🛒';return '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:6px;background:#f8fafc;margin-bottom:4px;border:1px solid #f1f5f9"><span style="font-size:12px">'+ic+' '+it.name+(it.qty>1?' x'+it.qty:'')+'</span><span style="font-size:12px;font-weight:700">¥'+(it.price*it.qty)+'</span></div>';}).join('');
+  document.getElementById('st-body').innerHTML='<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><span style="color:#94a3b8">客户：</span><span style="font-weight:600">'+o.customer+'</span></div><div><span style="color:#94a3b8">手机：</span><span style="font-weight:600">'+(o.phone||'—')+'</span></div><div><span style="color:#94a3b8">宠物：</span><span style="font-weight:600">'+(o.pet||'—')+'</span></div><div><span style="color:#94a3b8">日期：</span><span style="font-weight:600">'+o.date+' '+o.time+'</span></div><div><span style="color:#94a3b8">支付：</span><span style="font-weight:600">'+o.payment+'</span></div><div><span style="color:#94a3b8">收银：</span><span style="font-weight:600">'+o.cashier+'</span></div></div></div><div class="form-label">消费项目</div>'+iH+'<div style="padding:10px 14px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:13px;font-weight:600;color:#059669">实收金额</span><span style="font-size:18px;font-weight:800;color:#059669">¥'+o.total+'</span></div><div style="display:flex;gap:8px;margin-top:20px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">关闭</button><button class="btn-outline" style="flex:1;justify-content:center">🖨️ 补打小票</button></div>';
+  document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';
+}
+
+// ═══ 交接班与日结 ═══
+function renderPosShift(){ var el=document.getElementById('pos-content');
+  var sub=POS.shiftSub||'shifts';
+  var stH='<div style="display:flex;gap:4px;margin-bottom:16px"><button style="padding:7px 18px;border-radius:8px;border:1px solid '+(sub==='shifts'?'#2563eb':'#e9edf3')+';background:'+(sub==='shifts'?'#eff6ff':'#fff')+';color:'+(sub==='shifts'?'#2563eb':'#64748b')+';font-size:13px;font-weight:600;cursor:pointer" onclick="POS.shiftSub=\'shifts\';renderPosShift()">交接班</button><button style="padding:7px 18px;border-radius:8px;border:1px solid '+(sub==='daily'?'#2563eb':'#e9edf3')+';background:'+(sub==='daily'?'#eff6ff':'#fff')+';color:'+(sub==='daily'?'#2563eb':'#64748b')+';font-size:13px;font-weight:600;cursor:pointer" onclick="POS.shiftSub=\'daily\';renderPosShift()">日结</button></div>';
+  if(sub==='shifts'){
+    function shSt(s){return s==='active'?'<span class="badge" style="background:#dbeafe;color:#1d4ed8">当班</span>':'<span class="badge" style="background:#f1f5f9;color:#475569">已交接</span>';}
+    var rows=POS_SHIFTS.map(function(s){var t=s.cashIn+s.wechat+s.alipay+s.memberPay+s.cardDeduct;return '<tr><td style="font-weight:600;color:#2563eb;font-size:12px">'+s.id+'</td><td style="color:#64748b">'+s.date+'</td><td style="font-weight:500">'+s.cashier+'</td><td>'+s.shift+'</td><td style="font-size:12px;color:#64748b">'+s.start+(s.end?' - '+s.end:'')+'</td><td style="text-align:center;font-weight:600">'+s.totalOrders+'</td><td style="text-align:right;font-weight:700">¥'+t.toLocaleString()+'</td><td style="text-align:center">'+shSt(s.status)+'</td><td><div class="row-actions">'+(s.status==='active'?'<button class="btn-table blue" onclick="openPosShiftEnd(\''+s.id+'\')">交接</button>':'<button class="btn-table gray" onclick="openPosShiftDetail(\''+s.id+'\')">查看</button>')+'</div></td></tr>';}).join('');
+    el.innerHTML=stH+'<div class="data-table-wrap"><table class="data-table"><thead><tr><th>班次</th><th>日期</th><th>收银员</th><th>班</th><th>时段</th><th style="text-align:center">单数</th><th style="text-align:right">合计</th><th style="text-align:center">状态</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  } else {
+    var dR=POS_DAILY.map(function(d){var mp=d.medical?Math.round(d.medical/d.totalRevenue*100):0,gp=d.groom?Math.round(d.groom/d.totalRevenue*100):0,rp=d.retail?Math.round(d.retail/d.totalRevenue*100):0;return '<tr><td style="font-weight:600">'+d.date+'</td><td style="text-align:right;font-weight:800;font-size:14px">¥'+d.totalRevenue.toLocaleString()+'</td><td style="text-align:right;color:#059669;font-weight:600">¥'+d.realIncome.toLocaleString()+'</td><td style="text-align:right;color:#2563eb">¥'+d.memberConsume.toLocaleString()+'</td><td style="text-align:right;color:#7c3aed">¥'+d.recharge.toLocaleString()+'</td><td><div style="display:flex;gap:2px;height:14px;border-radius:3px;overflow:hidden"><div style="width:'+mp+'%;background:#3b82f6"></div><div style="width:'+gp+'%;background:#10b981"></div><div style="width:'+rp+'%;background:#f59e0b"></div></div><div style="font-size:9px;color:#94a3b8;margin-top:1px">医'+mp+'% 洗'+gp+'% 零'+rp+'%</div></td><td style="text-align:center">'+d.orders+'</td><td><button class="btn-table blue" onclick="openPosDailyDetail(\''+d.date+'\')">详情</button></td></tr>';}).join('');
+    el.innerHTML=stH+'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:14px;font-weight:700">📊 日结</div><button class="btn-primary" style="font-size:12px;background:#334155">生成今日日报</button></div><div class="data-table-wrap"><table class="data-table"><thead><tr><th>日期</th><th style="text-align:right">营业额</th><th style="text-align:right">实收</th><th style="text-align:right">储值消耗</th><th style="text-align:right">充值</th><th>占比</th><th style="text-align:center">单数</th><th>操作</th></tr></thead><tbody>'+dR+'</tbody></table></div>';
+  }
+}
+function openPosShiftEnd(id){document.getElementById('st-title').textContent='交接班';document.getElementById('st-body').innerHTML='<div style="padding:12px 16px;border-radius:10px;background:#eff6ff;font-size:13px;color:#1d4ed8;font-weight:600;text-align:center;margin-bottom:16px">⚠️ 盲交接：请清点钱箱后输入实际金额</div><div class="form-grid"><div class="full"><label class="form-label">实际现金 *</label><input type="number" class="form-input" placeholder="清点后输入..." style="font-size:16px;text-align:center;font-weight:700"></div><div class="full"><label class="form-label">备注</label><textarea class="form-input" rows="2" placeholder="差异原因..."></textarea></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1;background:#059669">确认交接</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+function openPosShiftDetail(id){var s=POS_SHIFTS.find(function(x){return x.id===id;});if(!s)return;document.getElementById('st-title').textContent='班次 - '+s.id;var t=s.cashIn+s.wechat+s.alipay+s.memberPay+s.cardDeduct;document.getElementById('st-body').innerHTML='<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><span style="color:#94a3b8">收银员：</span><span style="font-weight:600">'+s.cashier+'</span></div><div><span style="color:#94a3b8">时段：</span><span style="font-weight:600">'+s.start+'-'+s.end+'</span></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><div style="padding:10px;border-radius:8px;background:#f0fdf4;text-align:center;border:1px solid #bbf7d0"><div style="font-size:10px;color:#059669">现金</div><div style="font-size:16px;font-weight:800">¥'+s.cashIn+'</div></div><div style="padding:10px;border-radius:8px;background:#eff6ff;text-align:center;border:1px solid #bfdbfe"><div style="font-size:10px;color:#2563eb">微信</div><div style="font-size:16px;font-weight:800">¥'+s.wechat+'</div></div><div style="padding:10px;border-radius:8px;background:#eff6ff;text-align:center;border:1px solid #bfdbfe"><div style="font-size:10px;color:#2563eb">支付宝</div><div style="font-size:16px;font-weight:800">¥'+s.alipay+'</div></div><div style="padding:10px;border-radius:8px;background:#fdf4ff;text-align:center;border:1px solid #e9d5ff"><div style="font-size:10px;color:#7c3aed">余额</div><div style="font-size:16px;font-weight:800">¥'+s.memberPay+'</div></div></div><div style="padding:10px 14px;border-radius:8px;background:#f8fafc;border:1px solid #e9edf3;display:flex;justify-content:space-between;margin-bottom:14px"><span style="color:#64748b">合计</span><span style="font-size:16px;font-weight:800">¥'+t+'</span></div>'+(s.diff!==undefined?'<div style="padding:10px 14px;border-radius:8px;background:'+(s.diff===0?'#f0fdf4;border:1px solid #bbf7d0':'#fef2f2;border:1px solid #fecaca')+';font-size:12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>应交</span><span style="font-weight:600">¥'+s.expectedCash+'</span></div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>实交</span><span style="font-weight:600">¥'+s.actualCash+'</span></div><div style="display:flex;justify-content:space-between"><span>差额</span><span style="font-weight:700;color:'+(s.diff===0?'#059669':'#dc2626')+'">¥'+s.diff+'</span></div>'+(s.diffReason?'<div style="margin-top:4px;color:#92400e">原因：'+s.diffReason+'</div>':'')+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:20px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">关闭</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+function openPosDailyDetail(date){var d=POS_DAILY.find(function(x){return x.date===date;});if(!d)return;document.getElementById('st-title').textContent='日报 - '+d.date;document.getElementById('st-body').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div style="padding:12px;border-radius:10px;background:#f0fdf4;text-align:center;border:1px solid #bbf7d0"><div style="font-size:10px;color:#059669;font-weight:600">营业额</div><div style="font-size:20px;font-weight:800">¥'+d.totalRevenue.toLocaleString()+'</div></div><div style="padding:12px;border-radius:10px;background:#eff6ff;text-align:center;border:1px solid #bfdbfe"><div style="font-size:10px;color:#2563eb;font-weight:600">实收</div><div style="font-size:20px;font-weight:800">¥'+d.realIncome.toLocaleString()+'</div></div><div style="padding:12px;border-radius:10px;background:#fdf4ff;text-align:center;border:1px solid #e9d5ff"><div style="font-size:10px;color:#7c3aed;font-weight:600">储值消耗</div><div style="font-size:20px;font-weight:800">¥'+d.memberConsume.toLocaleString()+'</div></div><div style="padding:12px;border-radius:10px;background:#fef3c7;text-align:center;border:1px solid #fde68a"><div style="font-size:10px;color:#92400e;font-weight:600">充值</div><div style="font-size:20px;font-weight:800">¥'+d.recharge.toLocaleString()+'</div></div></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1;padding:10px;border-radius:8px;background:#dbeafe;text-align:center"><div style="font-size:10px;color:#1d4ed8">🏥 医疗</div><div style="font-size:14px;font-weight:800">¥'+d.medical.toLocaleString()+'</div></div><div style="flex:1;padding:10px;border-radius:8px;background:#d1fae5;text-align:center"><div style="font-size:10px;color:#059669">✂️ 洗护</div><div style="font-size:14px;font-weight:800">¥'+d.groom.toLocaleString()+'</div></div><div style="flex:1;padding:10px;border-radius:8px;background:#fef3c7;text-align:center"><div style="font-size:10px;color:#92400e">🛒 零售</div><div style="font-size:14px;font-weight:800">¥'+d.retail.toLocaleString()+'</div></div></div><div style="padding:8px 12px;border-radius:6px;background:#f8fafc;text-align:center;font-size:12px;color:#64748b">订单 <strong>'+d.orders+'</strong> 笔 · 新会员 <strong>'+d.newMembers+'</strong></div><div style="display:flex;gap:8px;margin-top:20px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">关闭</button><button class="btn-outline" style="flex:1;justify-content:center">导出</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+
+// ═══ 提成核算 ═══
+function renderPosCommission(){ var el=document.getElementById('pos-content');
+  var sub=POS.commSub||'data';
+  var stH='<div style="display:flex;gap:4px;margin-bottom:16px"><button style="padding:7px 18px;border-radius:8px;border:1px solid '+(sub==='data'?'#2563eb':'#e9edf3')+';background:'+(sub==='data'?'#eff6ff':'#fff')+';color:'+(sub==='data'?'#2563eb':'#64748b')+';font-size:13px;font-weight:600;cursor:pointer" onclick="POS.commSub=\'data\';renderPosCommission()">业绩明细</button><button style="padding:7px 18px;border-radius:8px;border:1px solid '+(sub==='rules'?'#2563eb':'#e9edf3')+';background:'+(sub==='rules'?'#eff6ff':'#fff')+';color:'+(sub==='rules'?'#2563eb':'#64748b')+';font-size:13px;font-weight:600;cursor:pointer" onclick="POS.commSub=\'rules\';renderPosCommission()">规则配置</button></div>';
+
+  if(sub==='data'){
+    var cm=POS.commMonth||'2025-03';
+    var data=POS_COMMISSION_DATA[cm]||[];
+    var totalC=data.reduce(function(s,c){return s+c.commission;},0);
+    var months=Object.keys(POS_COMMISSION_DATA).sort().reverse();
+    var monthSel='<select style="padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#0f172a" onchange="POS.commMonth=this.value;renderPosCommission()">'+months.map(function(m){return '<option value="'+m+'"'+(m===cm?' selected':'')+'>'+m+'</option>';}).join('')+'</select>';
+    var rows=data.map(function(c){return '<tr><td style="font-weight:600">'+c.staff+'</td><td style="color:#64748b">'+c.role+'</td><td style="text-align:center;font-weight:600">'+c.orders+'</td><td style="text-align:right;font-weight:600">¥'+c.revenue.toLocaleString()+'</td><td style="text-align:right;font-weight:800;color:#059669;font-size:14px">¥'+c.commission.toLocaleString()+'</td><td><button class="btn-table blue">明细</button></td></tr>';}).join('');
+    el.innerHTML=stH
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700">📈 业绩明细</div>'+monthSel+'</div><div style="display:flex;gap:12px"><div style="background:#fff;border-radius:8px;padding:8px 16px;border:1px solid #e9edf3"><span style="font-size:11px;color:#94a3b8">本月总提成</span> <span style="font-size:16px;font-weight:800;color:#059669;margin-left:6px">¥'+totalC.toLocaleString()+'</span></div><button class="btn-outline" style="font-size:12px">导出</button></div></div>'
+      +'<div class="data-table-wrap"><table class="data-table"><thead><tr><th>员工</th><th>角色</th><th style="text-align:center">接单</th><th style="text-align:right">营收</th><th style="text-align:right">提成</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  } else {
+    var rulesets=POS_COMMISSION_RULES.map(function(rs){
+      var rRows=rs.rules.map(function(r,i){return '<tr><td style="font-weight:500">'+r.role+'</td><td style="font-weight:600">'+r.item+'</td><td style="text-align:center;font-weight:800;color:#2563eb;font-size:14px">'+r.rate+'%</td><td><button class="btn-table blue" onclick="openPosRuleEdit('+rs.id+','+i+')">编辑</button></td></tr>';}).join('');
+      return '<div style="background:#fff;border-radius:14px;border:1px solid #e9edf3;overflow:hidden;margin-bottom:16px"><div style="padding:14px 18px;border-bottom:1px solid #e9edf3;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:700">'+rs.label+'</div><div style="font-size:11px;color:#94a3b8;margin-top:2px">📅 '+rs.period+'</div></div><div style="display:flex;gap:6px"><button class="btn-table blue" onclick="openPosRuleAdd('+rs.id+')">+ 新增规则</button><button class="btn-table gray" onclick="openPosRuleSetEdit('+rs.id+')">编辑时段</button></div></div><table class="data-table"><thead><tr><th>角色</th><th>项目</th><th style="text-align:center">提成比例</th><th>操作</th></tr></thead><tbody>'+rRows+'</tbody></table></div>';
+    }).join('');
+    el.innerHTML=stH
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:14px;font-weight:700">⚙️ 提成规则配置</div><button class="btn-primary" style="font-size:12px" onclick="openPosNewRuleSet()">+ 新增规则时段</button></div>'
+      +rulesets;
+  }
+}
+
+function openPosRuleEdit(setId,idx){var rs=POS_COMMISSION_RULES.find(function(x){return x.id===setId;});if(!rs)return;var r=rs.rules[idx];document.getElementById('st-title').textContent='编辑规则';document.getElementById('st-body').innerHTML='<div style="padding:8px 12px;border-radius:6px;background:#f8fafc;font-size:12px;color:#64748b;margin-bottom:16px">所属时段：'+rs.period+'</div><div class="form-grid"><div><label class="form-label">角色</label><input class="form-input" value="'+r.role+'"></div><div><label class="form-label">项目</label><input class="form-input" value="'+r.item+'"></div><div><label class="form-label">提成比例(%)</label><input type="number" class="form-input" value="'+r.rate+'"></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">保存</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+
+function openPosRuleAdd(setId){document.getElementById('st-title').textContent='新增规则';document.getElementById('st-body').innerHTML='<div class="form-grid"><div><label class="form-label">角色 *</label><select class="form-input"><option>主治医师</option><option>全科医师</option><option>主理美容师</option><option>助理美容师</option><option>前台</option></select></div><div><label class="form-label">项目 *</label><input class="form-input" placeholder="如：处方药"></div><div><label class="form-label">提成比例(%) *</label><input type="number" class="form-input" placeholder="0"></div></div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">保存</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+
+function openPosRuleSetEdit(setId){var rs=POS_COMMISSION_RULES.find(function(x){return x.id===setId;});if(!rs)return;var dates=rs.period.split(' ~ ');document.getElementById('st-title').textContent='编辑规则时段';document.getElementById('st-body').innerHTML='<div class="form-grid"><div class="full"><label class="form-label">时段名称</label><input class="form-input" value="'+rs.label+'"></div><div><label class="form-label">开始日期 *</label><input type="date" class="form-input" value="'+dates[0]+'"></div><div><label class="form-label">结束日期 *</label><input type="date" class="form-input" value="'+dates[1]+'"></div></div><div style="padding:10px 14px;border-radius:8px;background:#eff6ff;font-size:12px;color:#1d4ed8;margin-top:16px">💡 该时段内的所有订单将按此规则集计算提成</div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">保存</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
+
+function openPosNewRuleSet(){document.getElementById('st-title').textContent='新增规则时段';document.getElementById('st-body').innerHTML='<div class="form-grid"><div class="full"><label class="form-label">时段名称 *</label><input class="form-input" placeholder="如：2025年4月"></div><div><label class="form-label">开始日期 *</label><input type="date" class="form-input"></div><div><label class="form-label">结束日期 *</label><input type="date" class="form-input"></div></div><div style="padding:10px 14px;border-radius:8px;background:#fffbeb;font-size:12px;color:#92400e;margin-top:16px">💡 创建后可在该时段下添加具体的提成规则</div><div style="display:flex;gap:8px;margin-top:24px"><button class="btn-cancel" onclick="closeSt()" style="flex:1">取消</button><button class="btn-save" onclick="closeSt()" style="flex:1">创建</button></div>';document.getElementById('st-ov').style.display='block';document.getElementById('st-dw').style.display='flex';}
 
 </script>
 </body>
